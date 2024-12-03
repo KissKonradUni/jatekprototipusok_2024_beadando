@@ -1,6 +1,3 @@
----
----
-
 **Game Design Document**  
 **Játék címe:** Shadowspawn (Nem végleges)
 **Fejlesztők:** Garbage Collector  
