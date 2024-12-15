@@ -65,11 +65,11 @@ A játék egy survival action game, ahol a játékos karakter folyamatosan táma
    - Egy közös branch-en egy minimális működő verzió, ami tartalmazza:  
      - A beállított javascript projektet egy megnyíló üres Phaser.js canvas-al.
 
-1. **Mozgás és vezérlés:** (Stipistop: Konrád)
+1. **Mozgás és vezérlés:** (Konrád)
    - Játékos WASD/nyilak általi mozgatása.  
    - Végtelenül ismétlődő térkép implementálása (folytonos scrollozás, ha túl messze megyünk mindent visszateleportálunk középre úgy hogy ne látszódjon).
 
-2. **Támadási rendszer:** (Választható)
+2. **Támadási rendszer:** (Konrád)
    - Automatikus támadási mechanika létrehozása.  
    - Egy alap fegyverrel kezdünk.
 

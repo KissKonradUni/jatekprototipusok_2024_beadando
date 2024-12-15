@@ -16,6 +16,17 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        this.playerData = {
+            health: 100.0,
+            maxHealth: 100.0,
+            currentSpeed: playerAttributes.speed,
+            
+            inventory: [],
+            
+            damageCooldown: 100, // Cooldown for taking damage
+            lastDamage: 0,
+        }
+
         // Background
         // Infinite map was a bad idea, just make it big enough
         this.background = this.add.tileSprite(0, 0, screenSize.x * 5, screenSize.x * 5, "grass");
@@ -23,7 +34,7 @@ class GameScene extends Phaser.Scene {
         this.physics.world.setBounds(-screenSize.x * 2.5, -screenSize.y * 2.5, screenSize.x * 5, screenSize.y * 5);
 
         // TODO: Replace with spritesheet
-        this.player = this.add.text(0, 0, "Player", { fontSize: "32px", fill: "#fff", fontFamily: "Noto Sans" });
+        this.player = this.add.text(0, 0, "Player", { fontSize: "32px", fill: "#fff", fontFamily: "Noto Sans" }).setOrigin(0.5);
         this.physics.add.existing(this.player);
         this.player.body.setCollideWorldBounds(true);
 
@@ -40,6 +51,8 @@ class GameScene extends Phaser.Scene {
             
             right   : this.input.keyboard.addKey("D"),
             rightAlt: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
+
+            restart : this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R),
         };
 
         // Camera setup
@@ -48,11 +61,22 @@ class GameScene extends Phaser.Scene {
         // Example setup for enemies
         this.enemyObjects = this.add.group();
         this.enemies = [ 
-            new Enemy(this, -100, -100),
-            new Enemy(this,  100,  100),
+            new Enemy(this, -200, -200),
+            new Enemy(this,  200,  200),
+            new FastEnemy(this, 200, -200),
         ];
-        this.physics.add.collider(this.player, this.enemyObjects);
+        this.physics.add.collider(this.player, this.enemyObjects, (player, enemy) => {
+            this.damagePlayer(10);
+        });
         this.physics.add.collider(this.enemyObjects, this.enemyObjects);
+
+        // Example setup for weapon attacks
+        this.weaponAttacks = this.add.group();
+        this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
+            enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
+        });
+
+        this.playerData.inventory.push(new Sword(this, "Sword"));
     }
 
     init() {
@@ -64,6 +88,15 @@ class GameScene extends Phaser.Scene {
 
         for (let enemy of this.enemies) {     
             enemy.update();
+        }
+
+        for (let weapon of this.playerData.inventory) {
+            weapon.update();
+        }
+
+        // Restart scene (for debugging)
+        if (this.keyIn.restart.isDown) {
+            this.scene.restart();
         }
     }
 
@@ -85,6 +118,21 @@ class GameScene extends Phaser.Scene {
         playerMovement.scale(playerAttributes.speed);
         
         this.player.body.setVelocity(playerMovement.x, playerMovement.y);
+    }
+
+    damagePlayer(amount) {
+        if (this.playerData.lastDamage + this.playerData.damageCooldown > this.time.now) {
+            return;
+        }
+
+        this.playerData.health -= amount;
+        if (this.playerData.health <= 0) {
+            this.scene.restart();
+        }
+
+        this.playerData.lastDamage = this.time.now;
+
+        console.log("AUGH! " + this.playerData.health);
     }
 
 }
