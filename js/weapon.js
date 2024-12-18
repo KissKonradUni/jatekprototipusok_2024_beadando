@@ -15,12 +15,12 @@ class Sword {
         this.properties.name = "Sword";
 
         // TODO: Replace with sprite
-        this.weaponSprite = scene.add.text(0, 0, "Sword", { fontSize: "48px", fill: "#f00", fontFamily: "Noto Sans", align: "center" }).setOrigin(0.5);
+        this.weaponSprite = scene.add.sprite(0, 0,"Sword_1").setScale(2).setOrigin(0.5);
         this.weaponSprite.wrapper = this;
         
         scene.physics.add.existing(this.weaponSprite);
         scene.weaponAttacks.add(this.weaponSprite);
-        this.weaponSprite.body.setCircle(this.weaponSprite.width / 2, 0, -this.weaponSprite.width / 4);
+        this.weaponSprite.body.setCircle(this.weaponSprite.width , 0, -this.weaponSprite.width / 2);
 
         // hide the weapon sprite by default
         this.weaponSprite.setVisible(false);
@@ -57,7 +57,7 @@ class Sword {
         const player = this.scene.player;
         this.weaponSprite.setPosition(player.x, player.y);
 
-        const direction = this.weaponSprite.rotation;
+        const direction = this.weaponSprite.rotation-0.5;
         const distance = this.properties.attackRange;
 
         const x = player.x + distance * Math.cos(direction);

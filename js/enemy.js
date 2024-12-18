@@ -10,7 +10,7 @@ class Enemy {
     constructor(scene, x, y, text = "Enemy") {
         this.scene = scene;
 
-        this.properties = enemyAttributes;
+        this.properties = {...enemyAttributes};
         this.lastDamaged = 0;
 
         // TODO: Replace with sprite
