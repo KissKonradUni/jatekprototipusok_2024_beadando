@@ -2,6 +2,7 @@ const enemyAttributes = {
     speed:          128, // How fast the enemy moves
     health:         100, // How much health the enemy has
     stunTime:       200, // (ms) How long the enemy is stunned after being hit
+    damage:         10,  // How much damage it couse on attack
 };
 
 // TODO: Add variatons, elites, damage player on contact, etc.
@@ -60,15 +61,54 @@ class Enemy {
 
 }
 
-class FastEnemy extends Enemy {
+class Hound extends Enemy {
 
     constructor(scene, x, y) {
-        super(scene, x, y, "Fastboi");
+        super(scene, x, y, "Hound");
         this.properties = {
             speed:          256,
             health:         50,
             stunTime:       400,
+            damage:         15,
         }
     }
+}
 
+class Slime extends Enemy {
+
+    constructor(scene, x, y) {
+        super(scene, x, y, "Slime");
+        this.properties = {
+            speed:          96,
+            health:         140,
+            stunTime:       200,
+            damage:         5,
+        }
+    }
+}
+
+class Skeleton extends Enemy {
+
+    constructor(scene, x, y) {
+        super(scene, x, y, "Skeleton");
+        this.properties = {
+            speed:          128,
+            health:         80,
+            stunTime:       100,
+            damage:         10,
+        }
+    }
+}
+
+class Zombie extends Enemy {
+
+    constructor(scene, x, y) {
+        super(scene, x, y, "Zombie");
+        this.properties = {
+            speed:          100,
+            health:         100,
+            stunTime:       300,
+            damage:         12,
+        }
+    }
 }

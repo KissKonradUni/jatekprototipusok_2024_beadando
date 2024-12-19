@@ -128,6 +128,7 @@ class GameScene extends Phaser.Scene {
             health: 100.0,
             maxHealth: 100.0,
             currentSpeed: playerAttributes.speed,
+            level: 0,
 
             inventory: [],
 
@@ -473,18 +474,38 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    //TODO: wave like spawn, multiple, depending on player level harder enemies, more diverse enemies
     setEnemySpawn(){
         this.time.addEvent({
-            delay:2000,
+            delay:10000,
             repeat: -1,
             callback: ()=>{
-                console.log("Add new enemy");
-                this.enemies.push(new Enemy(this,150,150));
+                console.log("New wave!");
+                this.spawnWave();
                 this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
                     enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
                 });
             }
         });
+    }
+
+    spawnWave(){
+        this.time.addEvent({
+            delay:50,
+            repeat: 10,
+            callback: ()=>{
+                console.log("Add new enemy");
+                let x = Math.random() * screenSize.x;
+                let y = Math.random() * screenSize.y;
+                while ((x-this.player.x)*(x-this.player.x)+(y-this.player.y)*(y-this.player.y) < 250)
+                {
+                    x = Math.random() * screenSize.x;
+                    y = Math.random() * screenSize.y;
+                }
+                this.enemies.push(new Enemy(this,x,y));
+            }
+        });
+        
     }
 }
 
