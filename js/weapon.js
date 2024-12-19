@@ -1,7 +1,7 @@
 const weaponAttributes = {
     attackInterval: 3000, // ms
     attackLength:   1000, // ms
-    attackDamage:   10,
+    attackDamage:   50,
     attackRange:    64,
 };
 

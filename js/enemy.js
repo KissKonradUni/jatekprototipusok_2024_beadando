@@ -8,14 +8,14 @@ const enemyAttributes = {
 // TODO: Add variatons, elites, damage player on contact, etc.
 class Enemy {
 
-    constructor(scene, x, y, text = "Enemy") {
+    constructor(scene, x, y, text = "slime") {
         this.scene = scene;
 
         this.properties = {...enemyAttributes};
         this.lastDamaged = 0;
 
         // TODO: Replace with sprite
-        this.enemyObject = scene.add.text(x, y, text, { fontSize: "32px", fill: "#f00", fontFamily: "Noto Sans" });
+        this.enemyObject = scene.add.sprite(x, y, text,0);
         scene.physics.add.existing(this.enemyObject);
         scene.enemyObjects.add(this.enemyObject);
         
@@ -54,6 +54,8 @@ class Enemy {
     }
 
     die() {
+        new Exp(this.scene,this.enemyObject.x,this.enemyObject.y);
+
         this.scene.enemyObjects.remove(this.enemyObject);
         this.scene.enemies.splice(this.scene.enemies.indexOf(this), 1);
         this.enemyObject.destroy();
@@ -77,7 +79,7 @@ class Hound extends Enemy {
 class Slime extends Enemy {
 
     constructor(scene, x, y) {
-        super(scene, x, y, "Slime");
+        super(scene, x, y, "slime");
         this.properties = {
             speed:          96,
             health:         140,
@@ -110,5 +112,17 @@ class Zombie extends Enemy {
             stunTime:       300,
             damage:         12,
         }
+    }
+}
+
+class Exp{
+    constructor(scene, x, y, text="0"){
+        this.scene=scene;
+        this.expOrb=scene.add.sprite(x, y, "expOrb").setScale(0.2);
+        this.expOrb.setData("quantity",10);
+        scene.physics.add.existing(this.expOrb);
+        this.expOrb.body.immovable = true;
+        scene.expOrbs.add(this.expOrb);
+        scene.exps.push(this.expOrb);
     }
 }

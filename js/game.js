@@ -14,6 +14,14 @@ class GameScene extends Phaser.Scene {
     preload() {
         this.load.image("grass", "assets/img/grass.png");
         this.load.image("Sword_1", "assets/weapons/sword_1.png");
+        this.load.image("expOrb", "assets/img/expOrb.png");
+
+        this.load.spritesheet("slime", "assets/enemies/slime.png", {
+            frameWidth: 32,
+            frameHeight: 32,
+            margin: 0,
+            spacing: 0
+        });
         //running sheets
         this.load.spritesheet("rLeft", "assets/hero/run_left.png", {
             frameWidth: 64,
@@ -121,6 +129,7 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        console.log(this.textures.exists("slime"));
         if (!this.anims.exists("rDown"))
             this.createAnimetions();
 
@@ -128,7 +137,9 @@ class GameScene extends Phaser.Scene {
             health: 100.0,
             maxHealth: 100.0,
             currentSpeed: playerAttributes.speed,
+
             level: 0,
+            experience:0,
 
             inventory: [],
 
@@ -165,26 +176,34 @@ class GameScene extends Phaser.Scene {
         };
 
         // Camera setup
-        this.cameras.main.startFollow(this.player, false);
+        this.cameras.main.startFollow(this.player, false).setZoom(1.2);
 
-        // Example setup for enemies
-        this.enemyObjects = this.add.group();
-        this.enemies = [
-            // new Enemy(this, -200, -200),
-            // new Enemy(this, 200, 200),
-            // new FastEnemy(this, 200, -200),
-        ];
-
-        this.physics.add.collider(this.player, this.enemyObjects, (player, enemy) => {
-            this.damagePlayer(10);
+        // Setup exp system
+        this.expOrbs = this.add.group();
+        this.exps=[];
+        this.physics.add.collider(this.player,this.expOrbs, (player, orb)=>{
+            this.playerData.experience+=orb.getData("quantity");
+            console.log(this.playerData.experience);
+            orb.destroy();
         });
-        this.physics.add.collider(this.enemyObjects, this.enemyObjects);
 
         // Example setup for weapon attacks
         this.weaponAttacks = this.add.group();
-
         this.playerData.inventory.push(new Sword(this, "Sword"));
+
+
+        //Enemy setup
+        this.enemyObjects = this.add.group();
+        this.enemies = [];
         this.setEnemySpawn();
+
+        this.physics.add.collider(this.player, this.enemyObjects, (player, enemy) => {
+            this.damagePlayer(enemy.wrapper.properties.damage);
+        });
+        this.physics.add.collider(this.enemyObjects, this.enemyObjects);
+        this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
+            enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
+        });
     }
 
     init() {
@@ -481,31 +500,50 @@ class GameScene extends Phaser.Scene {
             repeat: -1,
             callback: ()=>{
                 console.log("New wave!");
-                this.spawnWave();
-                this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
-                    enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
-                });
+                this.spawnWaveOf(10,"slime");
             }
         });
     }
 
-    spawnWave(){
+    spawnWaveOf(numberOfSpawn,monsterType){
         this.time.addEvent({
             delay:50,
-            repeat: 10,
+            repeat: numberOfSpawn,
             callback: ()=>{
                 console.log("Add new enemy");
-                let x = Math.random() * screenSize.x;
-                let y = Math.random() * screenSize.y;
+                var x = Math.random() * screenSize.x;
+                var y = Math.random() * screenSize.y;
                 while ((x-this.player.x)*(x-this.player.x)+(y-this.player.y)*(y-this.player.y) < 250)
                 {
                     x = Math.random() * screenSize.x;
                     y = Math.random() * screenSize.y;
                 }
-                this.enemies.push(new Enemy(this,x,y));
+                this.createEnemy(x,y,monsterType);
+                
             }
         });
         
+    }
+
+    //create specific enemy based on monsterType variable
+    createEnemy(x,y,monsterType){
+        let enemy;
+        switch(monsterType){
+            case "slime":
+                enemy=new Slime(this,x,y,monsterType);
+                break;
+            case "hound":
+                enemy=new Hound(this,x,y,monsterType);
+                break;
+            case "zombie":
+                enemy=new Zombie(this,x,y,monsterType);
+                break;
+            case "skeleton":
+                enemy=new Skeleton(this,x,y,monsterType);
+                break;
+        }
+        this.enemies.push(enemy);
+        this.enemyObjects.add(enemy.enemyObject);
     }
 }
 
