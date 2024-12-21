@@ -2,13 +2,13 @@
     "levels": [
         {
             "expNeeded":150,
-            "waveInterval":7000,
+            "waveInterval":5000,
             "enemies":[
-                {"slime":3},
-                {"zombie":1}
+                {"key":"slime","quantity":3},
+                {"key":"skeleton","quantity":1}
             ],
-            "healAmount":5,
-            "healInterval":1000,
+            "healAmount":1,
+            "healInterval":5000,
             "maxHealth":100    
         },
 
@@ -16,12 +16,11 @@
             "expNeeded":300,
             "waveInterval":7000,
             "enemies":[
-                {"slime":3},
-                {"zombie":2},
-                {"skeleton":1}
+                {"key":"slime","quantity":5},
+                {"key":"skeleton","quantity":3}
             ],
-            "healAmount":6,
-            "healInterval":1000,
+            "healAmount":2,
+            "healInterval":4900,
             "maxHealth":120    
         }
     ]

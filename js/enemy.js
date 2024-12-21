@@ -15,7 +15,7 @@ class Enemy {
         this.lastDamaged = 0;
 
         // TODO: Replace with sprite
-        this.enemyObject = scene.add.sprite(x, y, text,0);
+        this.enemyObject = scene.add.sprite(x, y, text,0).play(text+"Move");
         scene.physics.add.existing(this.enemyObject);
         scene.enemyObjects.add(this.enemyObject);
         
@@ -92,7 +92,7 @@ class Slime extends Enemy {
 class Skeleton extends Enemy {
 
     constructor(scene, x, y) {
-        super(scene, x, y, "Skeleton");
+        super(scene, x, y, "skeleton");
         this.properties = {
             speed:          128,
             health:         80,

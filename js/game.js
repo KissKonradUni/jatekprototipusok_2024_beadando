@@ -16,9 +16,17 @@ class GameScene extends Phaser.Scene {
         this.load.image("Sword_1", "assets/weapons/sword_1.png");
         this.load.image("expOrb", "assets/img/expOrb.png");
 
+        this.load.json('levelData', 'assets/gameData.json');
+
         this.load.spritesheet("slime", "assets/enemies/slime.png", {
             frameWidth: 32,
             frameHeight: 32,
+            margin: 0,
+            spacing: 0
+        });
+        this.load.spritesheet("skeleton", "assets/enemies/skeleton.png", {
+            frameWidth: 48,
+            frameHeight: 56,
             margin: 0,
             spacing: 0
         });
@@ -129,7 +137,8 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        console.log(this.textures.exists("slime"));
+        
+        this.levelData = this.cache.json.get('levelData');
         if (!this.anims.exists("rDown"))
             this.createAnimetions();
 
@@ -146,6 +155,7 @@ class GameScene extends Phaser.Scene {
             damageCooldown: 700, // Cooldown for taking damage
             lastDamage: 0,
         }
+        this.playerData.maxHealth=this.levelData.levels[this.playerData.level].maxHealth;
 
         // Background
         // Infinite map was a bad idea, just make it big enough
@@ -185,6 +195,8 @@ class GameScene extends Phaser.Scene {
             this.playerData.experience+=orb.getData("quantity");
             console.log(this.playerData.experience);
             orb.destroy();
+            if(this.playerData.experience>=this.levelData.levels[this.playerData.level].expNeeded)
+                this.levelUp();
         });
 
         // Example setup for weapon attacks
@@ -204,6 +216,9 @@ class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
             enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
         });
+
+        //Self recovery, amount and interval depend on level
+        this.setSelfRecovery();
     }
 
     init() {
@@ -491,26 +506,47 @@ class GameScene extends Phaser.Scene {
             yoyo: false,
             repeat: 0
         });
+
+        //monster animations
+        this.anims.create({
+            key: 'slimeMove',
+            frames: this.anims.generateFrameNames("slime", {
+                frames: [0, 1, 2, 3]
+            }),
+            duration: 300,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'skeletonMove',
+            frames: this.anims.generateFrameNames("skeleton", {
+                frames: [0, 1, 2]
+            }),
+            duration: 300,
+            repeat: -1
+        });
     }
 
-    //TODO: wave like spawn, multiple, depending on player level harder enemies, more diverse enemies
+    //TODO: boss spawn
     setEnemySpawn(){
         this.time.addEvent({
-            delay:10000,
+            delay:this.levelData.levels[this.playerData.level].waveInterval,
             repeat: -1,
             callback: ()=>{
                 console.log("New wave!");
-                this.spawnWaveOf(10,"slime");
+                this.levelData.levels[this.playerData.level].enemies.forEach(element => {
+                    this.spawnWaveOf(element.quantity-1,element.key);
+                });
+                //
             }
         });
     }
 
     spawnWaveOf(numberOfSpawn,monsterType){
-        this.time.addEvent({
+        this.waveTimer=this.time.addEvent({
             delay:50,
             repeat: numberOfSpawn,
             callback: ()=>{
-                console.log("Add new enemy");
+                console.log("Add enemy:"+monsterType);
                 var x = Math.random() * screenSize.x;
                 var y = Math.random() * screenSize.y;
                 while ((x-this.player.x)*(x-this.player.x)+(y-this.player.y)*(y-this.player.y) < 250)
@@ -544,6 +580,31 @@ class GameScene extends Phaser.Scene {
         }
         this.enemies.push(enemy);
         this.enemyObjects.add(enemy.enemyObject);
+    }
+
+    setSelfRecovery(){
+        this.recoveryTimer=this.time.addEvent({
+            delay:this.levelData.levels[this.playerData.level].healInterval,
+            repeat: -1,
+            callback: ()=>{
+                this.playerData.health+=this.levelData.levels[this.playerData.level].healAmount;
+                if(this.playerData.health>this.playerData.maxHealth)
+                    this.playerData.health=this.playerData.maxHealth;
+                console.log("Healin: "+this.playerData.health);
+            }
+        });
+    }
+
+    levelUp(){
+        this.playerData.experience-=this.levelData.levels[this.playerData.level].expNeeded;
+        this.playerData.level++;
+        this.playerData.maxHealth=this.levelData.levels[this.playerData.level].maxHealth;
+        this.time.removeEvent(this.waveTimer);
+        this.time.removeEvent(this.recoveryTimer);
+        this.setSelfRecovery();
+        this.setEnemySpawn();
+
+        console.log("Level up: " + this.playerData.level);
     }
 }
 
