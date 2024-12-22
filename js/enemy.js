@@ -3,6 +3,7 @@ const enemyAttributes = {
     health:         100, // How much health the enemy has
     stunTime:       200, // (ms) How long the enemy is stunned after being hit
     damage:         10,  // How much damage it couse on attack
+    exp:            5,
 };
 
 // TODO: Add variatons, elites, damage player on contact, etc.
@@ -54,7 +55,7 @@ class Enemy {
     }
 
     die() {
-        new Exp(this.scene,this.enemyObject.x,this.enemyObject.y);
+        new Exp(this.scene,this.enemyObject.x,this.enemyObject.y,this.properties.exp);
 
         this.scene.enemyObjects.remove(this.enemyObject);
         this.scene.enemies.splice(this.scene.enemies.indexOf(this), 1);
@@ -66,12 +67,13 @@ class Enemy {
 class Hound extends Enemy {
 
     constructor(scene, x, y) {
-        super(scene, x, y, "Hound");
+        super(scene, x, y, "hound");
         this.properties = {
             speed:          256,
             health:         50,
             stunTime:       400,
             damage:         15,
+            exp:            15,
         }
     }
 }
@@ -85,6 +87,7 @@ class Slime extends Enemy {
             health:         140,
             stunTime:       200,
             damage:         5,
+            exp:            5,
         }
     }
 }
@@ -98,6 +101,7 @@ class Skeleton extends Enemy {
             health:         80,
             stunTime:       100,
             damage:         10,
+            exp:            7,
         }
     }
 }
@@ -105,21 +109,22 @@ class Skeleton extends Enemy {
 class Zombie extends Enemy {
 
     constructor(scene, x, y) {
-        super(scene, x, y, "Zombie");
+        super(scene, x, y, "zombie");
         this.properties = {
             speed:          100,
             health:         100,
             stunTime:       300,
             damage:         12,
+            exp:            10,
         }
     }
 }
 
 class Exp{
-    constructor(scene, x, y, text="0"){
+    constructor(scene, x, y, amount=10){
         this.scene=scene;
         this.expOrb=scene.add.sprite(x, y, "expOrb").setScale(0.2);
-        this.expOrb.setData("quantity",10);
+        this.expOrb.setData("quantity",amount);
         scene.physics.add.existing(this.expOrb);
         this.expOrb.body.immovable = true;
         scene.expOrbs.add(this.expOrb);

@@ -30,6 +30,12 @@ class GameScene extends Phaser.Scene {
             margin: 0,
             spacing: 0
         });
+        this.load.spritesheet("zombie", "assets/enemies/zombie.png", {
+            frameWidth: 48,
+            frameHeight: 64,
+            margin: 0,
+            spacing: 0
+        });
         //running sheets
         this.load.spritesheet("rLeft", "assets/hero/run_left.png", {
             frameWidth: 64,
@@ -519,6 +525,14 @@ class GameScene extends Phaser.Scene {
         this.anims.create({
             key: 'skeletonMove',
             frames: this.anims.generateFrameNames("skeleton", {
+                frames: [0, 1, 2]
+            }),
+            duration: 300,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'zombieMove',
+            frames: this.anims.generateFrameNames("zombie", {
                 frames: [0, 1, 2]
             }),
             duration: 300,
