@@ -4,6 +4,7 @@ const enemyAttributes = {
     stunTime:       200, // (ms) How long the enemy is stunned after being hit
     damage:         10,  // How much damage it couse on attack
     exp:            5,
+    lookTo:         "right",
 };
 
 // TODO: Add variatons, elites, damage player on contact, etc.
@@ -39,6 +40,20 @@ class Enemy {
         }
 
         this.enemyObject.body.setVelocity(direction.x, direction.y);
+
+        //set flip
+        if(this.enemyObject.body.position.x-this.scene.player.body.position.x<0 && this.properties.lookTo=="left"){
+            this.enemyObject.setFlip(true);
+        }else if(this.enemyObject.body.position.x-this.scene.player.body.position.x<0 && this.properties.lookTo=="right")
+        {
+            this.enemyObject.setFlip(false);
+        }else if(this.enemyObject.body.position.x-this.scene.player.body.position.x>0 && this.properties.lookTo=="left")
+        {
+            this.enemyObject.setFlip(false);
+        }else if(this.enemyObject.body.position.x-this.scene.player.body.position.x>0 && this.properties.lookTo=="right")
+            {
+                this.enemyObject.setFlip(true);
+            }
     }
 
     damage(amount) {
@@ -74,6 +89,7 @@ class Hound extends Enemy {
             stunTime:       400,
             damage:         15,
             exp:            15,
+            lookTo:         "right",
         }
     }
 }
@@ -88,6 +104,7 @@ class Slime extends Enemy {
             stunTime:       200,
             damage:         5,
             exp:            5,
+            lookTo:         "right",
         }
     }
 }
@@ -102,6 +119,7 @@ class Skeleton extends Enemy {
             stunTime:       100,
             damage:         10,
             exp:            7,
+            lookTo:         "left",
         }
     }
 }
@@ -116,6 +134,7 @@ class Zombie extends Enemy {
             stunTime:       300,
             damage:         12,
             exp:            10,
+            lookTo:         "right",
         }
     }
 }

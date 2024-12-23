@@ -6,7 +6,7 @@
             "enemies":[
                 {"key":"slime","quantity":3},
                 {"key":"skeleton","quantity":1},
-                {"key":"zombie","quantity":1}
+                {"key":"hound","quantity":1}
             ],
             "healAmount":1,
             "healInterval":5000,

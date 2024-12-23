@@ -18,6 +18,7 @@ class GameScene extends Phaser.Scene {
 
         this.load.json('levelData', 'assets/gameData.json');
 
+        //enemy sprites
         this.load.spritesheet("slime", "assets/enemies/slime.png", {
             frameWidth: 32,
             frameHeight: 32,
@@ -36,6 +37,13 @@ class GameScene extends Phaser.Scene {
             margin: 0,
             spacing: 0
         });
+        this.load.spritesheet("hound", "assets/enemies/hound.png", {
+            frameWidth: 107,
+            frameHeight: 64,
+            margin: 0,
+            spacing: 0
+        });
+
         //running sheets
         this.load.spritesheet("rLeft", "assets/hero/run_left.png", {
             frameWidth: 64,
@@ -143,7 +151,7 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        
+
         this.levelData = this.cache.json.get('levelData');
         if (!this.anims.exists("rDown"))
             this.createAnimetions();
@@ -154,14 +162,14 @@ class GameScene extends Phaser.Scene {
             currentSpeed: playerAttributes.speed,
 
             level: 0,
-            experience:0,
+            experience: 0,
 
             inventory: [],
 
             damageCooldown: 700, // Cooldown for taking damage
             lastDamage: 0,
         }
-        this.playerData.maxHealth=this.levelData.levels[this.playerData.level].maxHealth;
+        this.playerData.maxHealth = this.levelData.levels[this.playerData.level].maxHealth;
 
         // Background
         // Infinite map was a bad idea, just make it big enough
@@ -169,10 +177,16 @@ class GameScene extends Phaser.Scene {
         this.cameras.main.setBounds(-screenSize.x * 2.5, -screenSize.y * 2.5, screenSize.x * 5, screenSize.y * 5);
         this.physics.world.setBounds(-screenSize.x * 2.5, -screenSize.y * 2.5, screenSize.x * 5, screenSize.y * 5);
 
-        // TODO: Replace with spritesheet
+        //create player
         this.player = this.add.sprite(0, 0, "rDown", 1);
         this.physics.add.existing(this.player);
         this.player.body.setCollideWorldBounds(true);
+
+        //Data panels
+        this.healtText=this.add.text(115,70,"Health:",{ fontSize: "20px",strokeThickness:1, stroke:"#000", color:"#fff" }).setScrollFactor(0,0);
+        this.levelText=this.add.text(115,95,"Level:",{ fontSize: "20px",strokeThickness:1, stroke:"#000", color:"#fff" }).setScrollFactor(0,0);
+        this.expText=this.add.text(115,120,"Exp:",{ fontSize: "20px",strokeThickness:1, stroke:"#000", color:"#fff" }).setScrollFactor(0,0);
+
 
         // WASD Movement
         this.keyIn = {
@@ -192,16 +206,17 @@ class GameScene extends Phaser.Scene {
         };
 
         // Camera setup
-        this.cameras.main.startFollow(this.player, false).setZoom(1.2);
+        this.camera=this.cameras.main.startFollow(this.player, false).setZoom(1.2);
+        console.log(this.camera.width,this.camera.height);
 
         // Setup exp system
         this.expOrbs = this.add.group();
-        this.exps=[];
-        this.physics.add.collider(this.player,this.expOrbs, (player, orb)=>{
-            this.playerData.experience+=orb.getData("quantity");
+        this.exps = [];
+        this.physics.add.collider(this.player, this.expOrbs, (player, orb) => {
+            this.playerData.experience += orb.getData("quantity");
             console.log(this.playerData.experience);
             orb.destroy();
-            if(this.playerData.experience>=this.levelData.levels[this.playerData.level].expNeeded)
+            if (this.playerData.experience >= this.levelData.levels[this.playerData.level].expNeeded)
                 this.levelUp();
         });
 
@@ -230,12 +245,16 @@ class GameScene extends Phaser.Scene {
     init() {
         this.lastMovment = "d";
         this.moveEnabled = true;
-        
+
     }
 
     update() {
         this.updatePlayerMovement();
-        
+
+        //update attribute panel
+        this.healtText.setText("Health: "+this.playerData.health+"/"+this.playerData.maxHealth);
+        this.levelText.setText("Level: "+this.playerData.level);
+        this.expText.setText("Exp: "+this.playerData.experience+"/"+this.levelData.levels[this.playerData.level].expNeeded);
 
         for (let enemy of this.enemies) {
             enemy.update();
@@ -312,7 +331,7 @@ class GameScene extends Phaser.Scene {
     }
 
     damagePlayer(amount) {
-        
+
         if (this.playerData.lastDamage + this.playerData.damageCooldown > this.time.now) {
             return;
         }
@@ -538,81 +557,88 @@ class GameScene extends Phaser.Scene {
             duration: 300,
             repeat: -1
         });
+        this.anims.create({
+            key: 'houndMove',
+            frames: this.anims.generateFrameNames("hound", {
+                frames: [0, 1, 2, 3, 4]
+            }),
+            duration: 300,
+            repeat: -1
+        });
     }
 
     //TODO: boss spawn
-    setEnemySpawn(){
+    setEnemySpawn() {
         this.time.addEvent({
-            delay:this.levelData.levels[this.playerData.level].waveInterval,
+            delay: this.levelData.levels[this.playerData.level].waveInterval,
             repeat: -1,
-            callback: ()=>{
+            callback: () => {
                 console.log("New wave!");
                 this.levelData.levels[this.playerData.level].enemies.forEach(element => {
-                    this.spawnWaveOf(element.quantity-1,element.key);
+                    this.spawnWaveOf(element.quantity - 1, element.key);
                 });
                 //
             }
         });
     }
 
-    spawnWaveOf(numberOfSpawn,monsterType){
-        this.waveTimer=this.time.addEvent({
-            delay:50,
+    spawnWaveOf(numberOfSpawn, monsterType) {
+        this.waveTimer = this.time.addEvent({
+            delay: 50,
             repeat: numberOfSpawn,
-            callback: ()=>{
-                console.log("Add enemy:"+monsterType);
+            callback: () => {
+                console.log("Add enemy:" + monsterType);
                 var x = Math.random() * screenSize.x;
                 var y = Math.random() * screenSize.y;
-                while ((x-this.player.x)*(x-this.player.x)+(y-this.player.y)*(y-this.player.y) < 250)
-                {
+                while ((x - this.player.x) * (x - this.player.x) + (y - this.player.y) * (y - this.player.y) < 250) {
                     x = Math.random() * screenSize.x;
                     y = Math.random() * screenSize.y;
                 }
-                this.createEnemy(x,y,monsterType);
-                
+                this.createEnemy(x, y, monsterType);
+
             }
         });
-        
+
     }
 
     //create specific enemy based on monsterType variable
-    createEnemy(x,y,monsterType){
+    createEnemy(x, y, monsterType) {
         let enemy;
-        switch(monsterType){
+        switch (monsterType) {
             case "slime":
-                enemy=new Slime(this,x,y,monsterType);
+                enemy = new Slime(this, x, y, monsterType);
                 break;
             case "hound":
-                enemy=new Hound(this,x,y,monsterType);
+                enemy = new Hound(this, x, y, monsterType);
                 break;
             case "zombie":
-                enemy=new Zombie(this,x,y,monsterType);
+                enemy = new Zombie(this, x, y, monsterType);
                 break;
             case "skeleton":
-                enemy=new Skeleton(this,x,y,monsterType);
+                enemy = new Skeleton(this, x, y, monsterType);
                 break;
         }
         this.enemies.push(enemy);
         this.enemyObjects.add(enemy.enemyObject);
     }
 
-    setSelfRecovery(){
-        this.recoveryTimer=this.time.addEvent({
-            delay:this.levelData.levels[this.playerData.level].healInterval,
+    setSelfRecovery() {
+        this.recoveryTimer = this.time.addEvent({
+            delay: this.levelData.levels[this.playerData.level].healInterval,
             repeat: -1,
-            callback: ()=>{
-                this.playerData.health+=this.levelData.levels[this.playerData.level].healAmount;
-                if(this.playerData.health>this.playerData.maxHealth)
-                    this.playerData.health=this.playerData.maxHealth;
-                console.log("Healin: "+this.playerData.health);
+            callback: () => {
+                this.playerData.health += this.levelData.levels[this.playerData.level].healAmount;
+                if (this.playerData.health > this.playerData.maxHealth)
+                    this.playerData.health = this.playerData.maxHealth;
+                console.log("Healin: " + this.playerData.health);
             }
         });
     }
 
-    levelUp(){
-        this.playerData.experience-=this.levelData.levels[this.playerData.level].expNeeded;
+    levelUp() {
+        this.playerData.experience -= this.levelData.levels[this.playerData.level].expNeeded;
         this.playerData.level++;
-        this.playerData.maxHealth=this.levelData.levels[this.playerData.level].maxHealth;
+        this.playerData.maxHealth = this.levelData.levels[this.playerData.level].maxHealth;
         this.time.removeEvent(this.waveTimer);
         this.time.removeEvent(this.recoveryTimer);
         this.setSelfRecovery();
@@ -620,6 +646,7 @@ class GameScene extends Phaser.Scene {
 
         console.log("Level up: " + this.playerData.level);
     }
+
 }
 
 const gameScene = new GameScene("Game");
