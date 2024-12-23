@@ -80,14 +80,14 @@ class Enemy {
 }
 
 class Hound extends Enemy {
-
     constructor(scene, x, y) {
         super(scene, x, y, "hound");
+        this.powerCurve=scene.playerData.level*0.05;
         this.properties = {
             speed:          256,
-            health:         50,
-            stunTime:       400,
-            damage:         15,
+            health:         50*(1+this.powerCurve*2),
+            stunTime:       400*(1-this.powerCurve),
+            damage:         15*(1+this.powerCurve),
             exp:            15,
             lookTo:         "right",
         }
@@ -95,14 +95,14 @@ class Hound extends Enemy {
 }
 
 class Slime extends Enemy {
-
     constructor(scene, x, y) {
         super(scene, x, y, "slime");
+        this.powerCurve=scene.playerData.level*0.05;
         this.properties = {
             speed:          96,
-            health:         140,
-            stunTime:       200,
-            damage:         5,
+            health:         140*(1+this.powerCurve*2),
+            stunTime:       200*(1-this.powerCurve),
+            damage:         5*(1+this.powerCurve),
             exp:            5,
             lookTo:         "right",
         }
@@ -110,14 +110,14 @@ class Slime extends Enemy {
 }
 
 class Skeleton extends Enemy {
-
     constructor(scene, x, y) {
         super(scene, x, y, "skeleton");
+        this.powerCurve=scene.playerData.level*0.05;
         this.properties = {
             speed:          128,
-            health:         80,
-            stunTime:       100,
-            damage:         10,
+            health:         80*(1+this.powerCurve*2),
+            stunTime:       100*(1-this.powerCurve),
+            damage:         10*(1+this.powerCurve),
             exp:            7,
             lookTo:         "left",
         }
@@ -125,14 +125,14 @@ class Skeleton extends Enemy {
 }
 
 class Zombie extends Enemy {
-
     constructor(scene, x, y) {
         super(scene, x, y, "zombie");
+        this.powerCurve=scene.playerData.level*0.05;
         this.properties = {
             speed:          100,
-            health:         100,
-            stunTime:       300,
-            damage:         12,
+            health:         100*(1+this.powerCurve*2),
+            stunTime:       300*(1-this.powerCurve),
+            damage:         12*(1+this.powerCurve),
             exp:            10,
             lookTo:         "right",
         }

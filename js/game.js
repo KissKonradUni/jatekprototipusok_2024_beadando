@@ -207,7 +207,6 @@ class GameScene extends Phaser.Scene {
 
         // Camera setup
         this.camera=this.cameras.main.startFollow(this.player, false).setZoom(1.2);
-        console.log(this.camera.width,this.camera.height);
 
         // Setup exp system
         this.expOrbs = this.add.group();
