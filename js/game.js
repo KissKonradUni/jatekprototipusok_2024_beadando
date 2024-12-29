@@ -13,7 +13,16 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         this.load.image("grass", "assets/img/grass.png");
+        //weapons
         this.load.image("Sword_1", "assets/weapons/sword_1.png");
+        this.load.image("Sword_2", "assets/weapons/sword_2.png");
+        this.load.image("Sword_3", "assets/weapons/sword_3.png");
+        this.load.image("Sword_4", "assets/weapons/sword_4.png");
+        this.load.image("Sword_5", "assets/weapons/sword_5.png");
+
+        this.load.image("Shuriken", "assets/weapons/Shuriken.png");
+
+
         this.load.image("expOrb", "assets/img/expOrb.png");
 
         this.load.json('levelData', 'assets/gameData.json');
@@ -152,6 +161,16 @@ class GameScene extends Phaser.Scene {
 
     create() {
 
+        //level up weapons in inventory
+        this.input.keyboard.on('keydown-T', (event) => {
+            console.log(event);
+            if (event.keyCode === Phaser.Input.Keyboard.KeyCodes.T) {
+                for (let weapon of this.playerData.inventory) {
+                    weapon.levelUp();
+                }
+            }
+        }, this);
+
         this.levelData = this.cache.json.get('levelData');
         if (!this.anims.exists("rDown"))
             this.createAnimetions();
@@ -183,10 +202,9 @@ class GameScene extends Phaser.Scene {
         this.player.body.setCollideWorldBounds(true);
 
         //Data panels
-        this.healtText=this.add.text(115,70,"Health:",{ fontSize: "20px",strokeThickness:1, stroke:"#000", color:"#fff" }).setScrollFactor(0,0);
-        this.levelText=this.add.text(115,95,"Level:",{ fontSize: "20px",strokeThickness:1, stroke:"#000", color:"#fff" }).setScrollFactor(0,0);
-        this.expText=this.add.text(115,120,"Exp:",{ fontSize: "20px",strokeThickness:1, stroke:"#000", color:"#fff" }).setScrollFactor(0,0);
-
+        this.healtText = this.add.text(115, 70, "Health:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" }).setScrollFactor(0, 0);
+        this.levelText = this.add.text(115, 95, "Level:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" }).setScrollFactor(0, 0);
+        this.expText = this.add.text(115, 120, "Exp:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" }).setScrollFactor(0, 0);
 
         // WASD Movement
         this.keyIn = {
@@ -206,7 +224,7 @@ class GameScene extends Phaser.Scene {
         };
 
         // Camera setup
-        this.camera=this.cameras.main.startFollow(this.player, false).setZoom(1.2);
+        this.camera = this.cameras.main.startFollow(this.player, false).setZoom(1.2);
 
         // Setup exp system
         this.expOrbs = this.add.group();
@@ -221,8 +239,9 @@ class GameScene extends Phaser.Scene {
 
         // Example setup for weapon attacks
         this.weaponAttacks = this.add.group();
-        this.playerData.inventory.push(new Sword(this, "Sword"));
-
+        //this.playerData.inventory.push(new Sword(this));
+        //this.playerData.inventory.push(new SpinningBlades(this));
+        //this.playerData.inventory.push(new Knife(this));
 
         //Enemy setup
         this.enemyObjects = this.add.group();
@@ -235,6 +254,8 @@ class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.enemyObjects, this.enemyObjects);
         this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
             enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
+            if(weapon.wrapper.properties.name=="Knife")
+                weapon.wrapper.isDisabled=true;
         });
 
         //Self recovery, amount and interval depend on level
@@ -250,10 +271,13 @@ class GameScene extends Phaser.Scene {
     update() {
         this.updatePlayerMovement();
 
+        //closest enemy to player
+        this.closest = this.physics.closest(this.player, this.enemies.map(a => a.enemyObject));
+        
         //update attribute panel
-        this.healtText.setText("Health: "+this.playerData.health+"/"+this.playerData.maxHealth);
-        this.levelText.setText("Level: "+this.playerData.level);
-        this.expText.setText("Exp: "+this.playerData.experience+"/"+this.levelData.levels[this.playerData.level].expNeeded);
+        this.healtText.setText("Health: " + this.playerData.health + "/" + this.playerData.maxHealth);
+        this.levelText.setText("Level: " + this.playerData.level);
+        this.expText.setText("Exp: " + this.playerData.experience + "/" + this.levelData.levels[this.playerData.level].expNeeded);
 
         for (let enemy of this.enemies) {
             enemy.update();
