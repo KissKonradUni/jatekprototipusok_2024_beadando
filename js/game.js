@@ -26,6 +26,7 @@ class GameScene extends Phaser.Scene {
         this.load.image("expOrb", "assets/img/expOrb.png");
 
         this.load.json('levelData', 'assets/gameData.json');
+        this.load.json('weapons', 'assets/weaponData.json');
 
         //enemy sprites
         this.load.spritesheet("slime", "assets/enemies/slime.png", {
@@ -172,6 +173,7 @@ class GameScene extends Phaser.Scene {
         }, this);
 
         this.levelData = this.cache.json.get('levelData');
+        this.weaponData = this.cache.json.get('weapons');
         if (!this.anims.exists("rDown"))
             this.createAnimetions();
 
@@ -241,7 +243,7 @@ class GameScene extends Phaser.Scene {
         this.weaponAttacks = this.add.group();
         //this.playerData.inventory.push(new Sword(this));
         //this.playerData.inventory.push(new SpinningBlades(this));
-        //this.playerData.inventory.push(new Knife(this));
+        this.playerData.inventory.push(new Knife(this));
 
         //Enemy setup
         this.enemyObjects = this.add.group();
@@ -254,8 +256,11 @@ class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.enemyObjects, this.enemyObjects);
         this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
             enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
-            if(weapon.wrapper.properties.name=="Knife")
-                weapon.wrapper.isDisabled=true;
+            if(weapon.wrapper.name=="Knife")
+                if(weapon.wrapper.throwable==0)
+                    weapon.wrapper.isDisabled=true;
+                else
+                    weapon.wrapper.attack();
         });
 
         //Self recovery, amount and interval depend on level

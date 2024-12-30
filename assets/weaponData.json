@@ -1,0 +1,89 @@
+{
+    "Sword":[
+        {
+            "attackInterval": 3000,
+            "attackLength": 1000,
+            "attackDamage":15,
+            "attackRange": 64
+        },
+        {
+         
+            "attackInterval": 2500,
+            "attackLength": 1100,
+            "attackDamage": 20,
+            "attackRange": 64
+        },
+        {
+         
+            "attackInterval": 2000,
+            "attackLength": 1200,
+            "attackDamage": 25,
+            "attackRange": 64
+        },
+        {
+         
+            "attackInterval": 1800,
+            "attackLength": 1400,
+            "attackDamage": 25,
+            "attackRange": 64
+        },
+        {
+         
+            "attackInterval": 1800,
+            "attackLength": 1500,
+            "attackDamage": 45,
+            "attackRange": 64
+        }   
+    ],
+    "Knife":[
+        {
+            "speed":400,
+            "attackInterval":2000,
+            "attackDamage":10
+        },
+        {
+            "speed":400,
+            "attackInterval":2200,
+            "attackDamage":15
+        },
+        {
+            "speed":400,
+            "attackInterval":2450,
+            "attackDamage":20
+        },
+        {
+            "speed":400,
+            "attackInterval":2500,
+            "attackDamage":25
+        },
+        {
+            "speed":400,
+            "attackInterval":2600,
+            "attackDamage":35
+        }
+    ],
+    "spinningBlade":[
+        {
+            
+            "attackRange":100,
+            "attackDamage":10
+        },
+        {
+            "attackRange":120,
+            "attackDamage":15
+        },
+        {
+            "attackRange":140,
+            "attackDamage":20
+        },
+        {
+            "attackRange":160,
+            "attackDamage":25
+        },
+        {
+            "attackRange":180,
+            "attackDamage":30
+        }
+        
+    ]   
+}

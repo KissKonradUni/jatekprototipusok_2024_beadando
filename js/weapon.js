@@ -1,17 +1,10 @@
-const weaponAttributes = {
-    attackInterval: 3000, // ms
-    attackLength: 1000, // ms
-    attackDamage: 50,
-    attackRange: 64,
-};
-
 class Sword {
 
     constructor(scene) {
         this.scene = scene;
         this.level = 1;
-        this.properties = weaponAttributes;
-        this.properties.name = "Sword";
+        this.properties = this.scene.weaponData.Sword[this.level-1];
+        this.name = "Sword";
 
         // TODO: Replace with sprite
         this.weaponSprite = scene.add.sprite(0, 0, "Sword_1").setScale(2).setOrigin(0.5);
@@ -26,14 +19,7 @@ class Sword {
         this.weaponSprite.body.enable = false;
 
         // create timer for weapon attack interval
-        this.attackTimer = scene.time.addEvent({
-            delay: this.properties.attackInterval,
-            callback: () => {
-                this.attack();
-                console.log("WHUZZZA! " + this.properties.name);
-            },
-            loop: true,
-        });
+        this.createTimer();
     }
 
     attack() {
@@ -69,17 +55,31 @@ class Sword {
         if (this.level < 5)
             this.level++;
         this.weaponSprite.setTexture("Sword_" + this.level);
+        this.properties=this.scene.weaponData.Sword[this.level-1];
+        this.scene.time.removeEvent(this.attackTimer);
+        this.createTimer();
+    }
+
+    createTimer(){
+        this.attackTimer = this.scene.time.addEvent({
+            delay: this.properties.attackInterval,
+            callback: () => {
+                this.attack();
+                console.log("WHUZZZA! " + this.name);
+            },
+            loop: true,
+        });
     }
 
 }
+
 class SpinningBlades {
     constructor(scene) {
         this.scene = scene;
-
-        this.properties = weaponAttributes;
-        this.properties.name = "Spinning Blade";
-        this.properties.attackRange = 100;
         this.level = 1;
+        this.properties = this.scene.weaponData.SpinningBlade[this.level-1];
+        this.name = "Spinning Blade";
+        this.properties.attackRange = 100;
         this.wrapper = this;
 
         this.blades = []
@@ -95,11 +95,14 @@ class SpinningBlades {
     }
 
     levelUp() {
-        this.numbers++;
+        if(this.level<5)
+            this.level++;
         this.blades.push(new SpinningBlade(this.scene, this));
+        for (let blade of this.blades) {
+            blade.sizeUp();
+        }
     }
 }
-
 class SpinningBlade {
 
     constructor(scene, wrapperClass) {
@@ -135,20 +138,25 @@ class SpinningBlade {
         this.weaponSprite.setPosition(x, y);
 
     }
+
+    sizeUp(){
+        this.weaponSprite.setScale(0.01+this.wrapperClass.level/500);
+    }
 }
 
 class Knife {
     constructor(scene) {
         this.scene = scene;
         this.level = 1;
-        this.speed = 400;
-        this.properties = weaponAttributes;
-        this.properties.name = "Knife";
+        this.throwable=this.level;
+        this.properties = this.scene.weaponData.Knife[this.level-1];
+        this.name = "Knife";
         this.enemyPositions = [];
         this.isDisabled=true;
 
         // TODO: Replace with sprite
         this.weaponSprite = scene.add.sprite(0, 0, "Sword_1").setScale(0.8);
+        this.weaponSprite.rotation=-3.14*20/8.9;
         this.weaponSprite.wrapper = this;
 
         scene.physics.add.existing(this.weaponSprite);
@@ -160,23 +168,20 @@ class Knife {
         this.weaponSprite.body.enable = false;
 
         // create timer for weapon attack interval
-        this.attackTimer = scene.time.addEvent({
-            delay: this.properties.attackInterval,
-            callback: () => {
-                this.attack();
-                console.log("WHUZZZA! " + this.properties.name);
-            },
-            loop: true,
-        });
+        this.createTimer();
     }
 
     attack() {
+        if(this.throwable==0){
+            this.throwable=this.level;
+        }
+        this.throwable--;
         this.isDisabled=false;
         this.weaponSprite.setVisible(true);
         this.weaponSprite.body.enable = true;
 
         this.weaponSprite.copyPosition(this.scene.player);
-
+        this.aimedEnemy=this.scene.closest;
     }
 
     update() {
@@ -184,10 +189,16 @@ class Knife {
             this.weaponSprite.setVisible(false);
             this.weaponSprite.body.enable = false;
         }
-        if (this.scene.closest != null && !this.isDisabled) {
+        if (this.aimedEnemy != null && !this.isDisabled) {
+            if(this.aimedEnemy.body==null)
+            {
+                this.throwable++;
+                this.attack();
+            }
             this.knifePos = this.weaponSprite.body.position;
-            let direction = this.scene.closest.body.position.clone().subtract(this.knifePos);
-            direction.normalize().scale(this.speed);
+            let direction = this.aimedEnemy.body.position.clone().subtract(this.knifePos);
+            direction.normalize().scale(this.properties.speed);
+            this.weaponSprite.rotation=-3.14*20/8.9+direction.angle()+3.14*2.5;
             this.weaponSprite.body.setVelocity(direction.x, direction.y);
         }
     }
@@ -195,7 +206,22 @@ class Knife {
     levelUp() {
         if (this.level < 5)
             this.level++;
+        this.properties = this.scene.weaponData.Knife[this.level-1];
         this.weaponSprite.setTexture("Sword_" + this.level);
+        this.scene.time.removeEvent(this.attackTimer);
+        this.createTimer();
+    }
+
+    createTimer(){
+        this.attackTimer = this.scene.time.addEvent({
+            delay: this.properties.attackInterval,
+            callback: () => {
+                if (this.scene.closest != null )
+                    this.attack();
+                console.log("WHUZZZA! " + this.properties.name);
+            },
+            loop: true,
+        });
     }
 
 }
