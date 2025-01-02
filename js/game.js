@@ -260,22 +260,6 @@ class GameScene extends Phaser.Scene {
 			if (this.playerData.experience >= this.levelData.levels[this.playerData.level].expNeeded) this.levelUp();
 		});
 
-		// Example setup for weapon attacks
-		this.weaponAttacks = this.add.group();
-		this.playerData.inventory.push(new Sword(this, "Sword"));
-
-		//Enemy setup
-		this.enemyObjects = this.add.group();
-		this.enemies = [];
-		this.setEnemySpawn();
-
-		this.physics.add.collider(this.player, this.enemyObjects, (player, enemy) => {
-			this.damagePlayer(enemy.wrapper.properties.damage);
-		});
-		this.physics.add.collider(this.enemyObjects, this.enemyObjects);
-		this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
-			enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
-		});
         // Example setup for weapon attacks
         this.weaponAttacks = this.add.group();
         this.playerData.inventory.push(new Knife(this));
@@ -293,7 +277,9 @@ class GameScene extends Phaser.Scene {
             enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
             if (weapon.wrapper.name == "Knife")
                 if (weapon.wrapper.throwable == 0)
+                {
                     weapon.wrapper.isDisabled = true;
+                }
                 else
                     weapon.wrapper.attack();
         });

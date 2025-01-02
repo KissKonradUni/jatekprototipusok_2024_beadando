@@ -185,8 +185,7 @@ class Knife {
         if(this.isDisabled){
             this.weaponSprite.setVisible(false);
             this.weaponSprite.body.enable = false;
-        }
-        if (this.aimedEnemy != null && !this.isDisabled) {
+        }else if (this.aimedEnemy != null) {
             if(this.aimedEnemy.body==null)
             {
                 this.throwable++;
