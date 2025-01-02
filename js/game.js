@@ -1,13 +1,13 @@
 /// <reference path="./types/index.d.ts" />
 
 const screenSize = {
-    x: 1280,
-    y: 720,
-}
+	x: 1280,
+	y: 720,
+};
 
 const playerAttributes = {
-    speed: 256.0,
-}
+	speed: 256.0,
+};
 
 class GameScene extends Phaser.Scene {
 
@@ -194,39 +194,48 @@ class GameScene extends Phaser.Scene {
 
 
 
-        // Background
-        // Infinite map was a bad idea, just make it big enough
-        this.background = this.add.tileSprite(0, 0, screenSize.x * 5, screenSize.x * 5, "grass");
-        this.cameras.main.setBounds(-screenSize.x * 2.5, -screenSize.y * 2.5, screenSize.x * 5, screenSize.y * 5);
-        this.physics.world.setBounds(-screenSize.x * 2.5, -screenSize.y * 2.5, screenSize.x * 5, screenSize.y * 5);
+		// Background
+		// Infinite map was a bad idea, just make it big enough
+		this.background = this.add.tileSprite(0, 0, screenSize.x * 5, screenSize.x * 5, "grass");
+		this.cameras.main.setBounds(-screenSize.x * 2.5, -screenSize.y * 2.5, screenSize.x * 5, screenSize.y * 5);
+		this.physics.world.setBounds(-screenSize.x * 2.5, -screenSize.y * 2.5, screenSize.x * 5, screenSize.y * 5);
 
-        //create player
-        this.player = this.add.sprite(0, 0, "rDown", 1);
-        this.physics.add.existing(this.player);
-        this.player.body.setCollideWorldBounds(true);
+		//create player
+		this.player = this.add.sprite(0, 0, "rDown", 1).setScale(2).setOrigin(0.5);
+		this.physics.add.existing(this.player);
+        this.player.body.setCircle(this.player.width / 4.0, 16, 16);
+		this.player.body.setCollideWorldBounds(true);
 
-        //Data panels
-        this.healtText = this.add.text(115, 70, "Health:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" }).setScrollFactor(0, 0);
-        this.levelText = this.add.text(115, 95, "Level:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" }).setScrollFactor(0, 0);
-        this.expText = this.add.text(115, 120, "Exp:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" }).setScrollFactor(0, 0);
+		//Data panels
+		this.healtText = this.add
+			.text(115, 70, "Health:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.setScrollFactor(0, 0);
+		this.levelText = this.add
+			.text(115, 95, "Level:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.setScrollFactor(0, 0);
+		this.expText = this.add
+			.text(115, 120, "Exp:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.setScrollFactor(0, 0);
 
-        // WASD Movement
-        this.keyIn = {
-            up: this.input.keyboard.addKey("W"),
-            upAlt: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
+		// WASD Movement
+		this.keyIn = {
+			up: this.input.keyboard.addKey("W"),
+			upAlt: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
 
-            down: this.input.keyboard.addKey("S"),
-            downAlt: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+			down: this.input.keyboard.addKey("S"),
+			downAlt: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
 
-            left: this.input.keyboard.addKey("A"),
-            leftAlt: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
+			left: this.input.keyboard.addKey("A"),
+			leftAlt: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
 
-            right: this.input.keyboard.addKey("D"),
-            rightAlt: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
+			right: this.input.keyboard.addKey("D"),
+			rightAlt: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
 
-            restart: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R),
-        };
+			restart: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R),
+		};
 
+		// Camera setup
+		this.camera = this.cameras.main.startFollow(this.player, false).setZoom(1.2);
         // Camera setup
         this.camera = this.cameras.main.startFollow(this.player, false).setZoom(1.2);
 
@@ -241,6 +250,32 @@ class GameScene extends Phaser.Scene {
                 this.levelUp();
         });
 
+		// Setup exp system
+		this.expOrbs = this.add.group();
+		this.exps = [];
+		this.physics.add.collider(this.player, this.expOrbs, (player, orb) => {
+			this.playerData.experience += orb.getData("quantity");
+			console.log(this.playerData.experience);
+			orb.destroy();
+			if (this.playerData.experience >= this.levelData.levels[this.playerData.level].expNeeded) this.levelUp();
+		});
+
+		// Example setup for weapon attacks
+		this.weaponAttacks = this.add.group();
+		this.playerData.inventory.push(new Sword(this, "Sword"));
+
+		//Enemy setup
+		this.enemyObjects = this.add.group();
+		this.enemies = [];
+		this.setEnemySpawn();
+
+		this.physics.add.collider(this.player, this.enemyObjects, (player, enemy) => {
+			this.damagePlayer(enemy.wrapper.properties.damage);
+		});
+		this.physics.add.collider(this.enemyObjects, this.enemyObjects);
+		this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
+			enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
+		});
         // Example setup for weapon attacks
         this.weaponAttacks = this.add.group();
         this.playerData.inventory.push(new Knife(this));
@@ -290,9 +325,9 @@ class GameScene extends Phaser.Scene {
             enemy.update();
         }
 
-        for (let weapon of this.playerData.inventory) {
-            weapon.update();
-        }
+		for (let weapon of this.playerData.inventory) {
+			weapon.update();
+		}
 
         // Restart scene (for debugging)
         if (this.keyIn.restart.isDown) {
@@ -412,193 +447,89 @@ class GameScene extends Phaser.Scene {
         console.log("AUGH! " + this.playerData.health);
     }
 
+	createAnimetions() {
+		Animations.init.bind(this)();
+	}
+
+	//TODO: boss spawn
+	setEnemySpawn() {
+		this.time.addEvent({
+			delay: this.levelData.levels[this.playerData.level].waveInterval,
+			repeat: -1,
+			callback: () => {
+				console.log("New wave!");
+				this.levelData.levels[this.playerData.level].enemies.forEach((element) => {
+					this.spawnWaveOf(element.quantity - 1, element.key);
+				});
+				//
+			},
+		});
+	}
+
+	spawnWaveOf(numberOfSpawn, monsterType) {
+		this.waveTimer = this.time.addEvent({
+			delay: 50,
+			repeat: numberOfSpawn,
+			callback: () => {
+				console.log("Add enemy:" + monsterType);
+				var x = Math.random() * screenSize.x;
+				var y = Math.random() * screenSize.y;
+				while ((x - this.player.x) * (x - this.player.x) + (y - this.player.y) * (y - this.player.y) < 250) {
+					x = Math.random() * screenSize.x;
+					y = Math.random() * screenSize.y;
+				}
+				this.createEnemy(x, y, monsterType);
+			},
+		});
+	}
+
+	//create specific enemy based on monsterType variable
+	createEnemy(x, y, monsterType) {
+		let enemy;
+		switch (monsterType) {
+			case "slime":
+				enemy = new Slime(this, x, y, monsterType);
+				break;
+			case "hound":
+				enemy = new Hound(this, x, y, monsterType);
+				break;
+			case "zombie":
+				enemy = new Zombie(this, x, y, monsterType);
+				break;
+			case "skeleton":
+				enemy = new Skeleton(this, x, y, monsterType);
+				break;
+		}
+		this.enemies.push(enemy);
+		this.enemyObjects.add(enemy.enemyObject);
+	}
+
+	setSelfRecovery() {
+		this.recoveryTimer = this.time.addEvent({
+			delay: this.levelData.levels[this.playerData.level].healInterval,
+			repeat: -1,
+			callback: () => {
+				this.playerData.health += this.levelData.levels[this.playerData.level].healAmount;
+				if (this.playerData.health > this.playerData.maxHealth) this.playerData.health = this.playerData.maxHealth;
+				console.log("Healin: " + this.playerData.health);
+			},
+		});
+	}
+
+	levelUp() {
+		this.playerData.experience -= this.levelData.levels[this.playerData.level].expNeeded;
+		this.playerData.level++;
+		this.playerData.maxHealth = this.levelData.levels[this.playerData.level].maxHealth;
+		this.time.removeEvent(this.waveTimer);
+		this.time.removeEvent(this.recoveryTimer);
+		this.setSelfRecovery();
+		this.setEnemySpawn();
+
+		console.log("Level up: " + this.playerData.level);
+	}
     createAnimetions() {
-        //run
-        this.anims.create({
-            key: 'rUp',
-            frames: this.anims.generateFrameNames("rUp", {
-                frames: [0, 1, 2, 3, 4, 5, 6, 7]
-            }),
-            frameRate: 12,
-            yoyo: true,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'rDown',
-            frames: this.anims.generateFrameNames("rDown", {
-                frames: [0, 1, 2, 3, 4, 5, 6, 7]
-            }),
-            frameRate: 12,
-            yoyo: true,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'rLeft',
-            frames: this.anims.generateFrameNames("rLeft", {
-                frames: [0, 1, 2, 3, 4, 5, 6, 7]
-            }),
-            frameRate: 12,
-            yoyo: true,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'rRight',
-            frames: this.anims.generateFrameNames("rRight", {
-                frames: [0, 1, 2, 3, 4, 5, 6, 7]
-            }),
-            frameRate: 12,
-            yoyo: true,
-            repeat: 0
-        });
-
-        //idle
-        this.anims.create({
-            key: 'iRight',
-            frames: this.anims.generateFrameNames("iRight", {
-                frames: [0, 1, 2, 3]
-            }),
-            frameRate: 12,
-            yoyo: true,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'iLeft',
-            frames: this.anims.generateFrameNames("iLeft", {
-                frames: [0, 1, 2, 3]
-            }),
-            frameRate: 12,
-            yoyo: true,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'iUp',
-            frames: this.anims.generateFrameNames("iUp", {
-                frames: [0, 1, 2, 3]
-            }),
-            frameRate: 12,
-            yoyo: true,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'iDown',
-            frames: this.anims.generateFrameNames("iDown", {
-                frames: [0, 1, 2, 3]
-            }),
-            frameRate: 12,
-            yoyo: true,
-            repeat: -1
-        });
-
-        //death
-        this.anims.create({
-            key: 'dRight',
-            frames: this.anims.generateFrameNames("dRight", {
-                frames: [0, 1, 2, 3, 4, 5, 6]
-            }),
-            frameRate: 12,
-            yoyo: false,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'dLeft',
-            frames: this.anims.generateFrameNames("dLeft", {
-                frames: [0, 1, 2, 3, 4, 5, 6]
-            }),
-            frameRate: 12,
-            yoyo: false,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'dUp',
-            frames: this.anims.generateFrameNames("dUp", {
-                frames: [0, 1, 2, 3, 4, 5, 6]
-            }),
-            frameRate: 12,
-            yoyo: false,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'dDown',
-            frames: this.anims.generateFrameNames("dDown", {
-                frames: [0, 1, 2, 3, 4, 5, 6]
-            }),
-            frameRate: 12,
-            yoyo: false,
-            repeat: 0
-        });
-
-        //taking damage
-        this.anims.create({
-            key: 'hRight',
-            frames: this.anims.generateFrameNames("hRight", {
-                frames: [0, 1, 2, 3, 4]
-            }),
-            duration: 100,
-            yoyo: false,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'hLeft',
-            frames: this.anims.generateFrameNames("hLeft", {
-                frames: [0, 1, 2, 3, 4]
-            }),
-            duration: 100,
-            yoyo: false,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'hUp',
-            frames: this.anims.generateFrameNames("hUp", {
-                frames: [0, 1, 2, 3, 4]
-            }),
-            duration: 100,
-            yoyo: false,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'hDown',
-            frames: this.anims.generateFrameNames("hDown", {
-                frames: [0, 1, 2, 3, 4]
-            }),
-            duration: 100,
-            yoyo: false,
-            repeat: 0
-        });
-
-        //monster animations
-        this.anims.create({
-            key: 'slimeMove',
-            frames: this.anims.generateFrameNames("slime", {
-                frames: [0, 1, 2, 3]
-            }),
-            duration: 300,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'skeletonMove',
-            frames: this.anims.generateFrameNames("skeleton", {
-                frames: [0, 1, 2]
-            }),
-            duration: 300,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'zombieMove',
-            frames: this.anims.generateFrameNames("zombie", {
-                frames: [0, 1, 2]
-            }),
-            duration: 300,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'houndMove',
-            frames: this.anims.generateFrameNames("hound", {
-                frames: [0, 1, 2, 3, 4]
-            }),
-            duration: 300,
-            repeat: -1
-        });
-    }
+		Animations.init.bind(this)();
+	}
 
     setEnemySpawn() {
         this.time.addEvent({

@@ -28,33 +28,42 @@ class Enemy {
     }
 
     update() {
-        const playerPos = this.scene.player.body.position;
-        const enemyPos  = this.enemyObject.body.position;
+			const playerPos = this.scene.player.body.position;
+			const enemyPos = this.enemyObject.body.position;
 
-        let direction = playerPos.clone().subtract(enemyPos);
-        direction.normalize();
-        direction.scale(this.properties.speed);
+			let direction = playerPos.clone().subtract(enemyPos);
+			direction.normalize();
+			direction.scale(this.properties.speed);
 
-        if (this.lastDamaged + this.properties.stunTime > this.scene.time.now) {
-            direction.scale(-1);
-        }
+			if (this.lastDamaged + this.properties.stunTime > this.scene.time.now) {
+				direction.scale(-1);
+			}
 
-        this.enemyObject.body.setVelocity(direction.x, direction.y);
+			this.enemyObject.body.setVelocity(direction.x, direction.y);
 
-        //set flip
-        if(this.enemyObject.body.position.x-this.scene.player.body.position.x<0 && this.properties.lookTo=="left"){
-            this.enemyObject.setFlip(true);
-        }else if(this.enemyObject.body.position.x-this.scene.player.body.position.x<0 && this.properties.lookTo=="right")
-        {
-            this.enemyObject.setFlip(false);
-        }else if(this.enemyObject.body.position.x-this.scene.player.body.position.x>0 && this.properties.lookTo=="left")
-        {
-            this.enemyObject.setFlip(false);
-        }else if(this.enemyObject.body.position.x-this.scene.player.body.position.x>0 && this.properties.lookTo=="right")
-            {
-                this.enemyObject.setFlip(true);
-            }
-    }
+			//set flip
+			if (
+				this.enemyObject.body.position.x - this.scene.player.body.position.x < 0 &&
+				this.properties.lookTo == "left"
+			) {
+				this.enemyObject.setFlip(true);
+			} else if (
+				this.enemyObject.body.position.x - this.scene.player.body.position.x < 0 &&
+				this.properties.lookTo == "right"
+			) {
+				this.enemyObject.setFlip(false);
+			} else if (
+				this.enemyObject.body.position.x - this.scene.player.body.position.x > 0 &&
+				this.properties.lookTo == "left"
+			) {
+				this.enemyObject.setFlip(false);
+			} else if (
+				this.enemyObject.body.position.x - this.scene.player.body.position.x > 0 &&
+				this.properties.lookTo == "right"
+			) {
+				this.enemyObject.setFlip(true);
+			}
+		}
 
     damage(amount) {
         this.properties.health -= amount;
@@ -84,12 +93,12 @@ class Hound extends Enemy {
         super(scene, x, y, "hound");
         this.powerCurve=scene.playerData.level*0.05;
         this.properties = {
-            speed:          256,
-            health:         50*(1+this.powerCurve*2),
-            stunTime:       400*(1-this.powerCurve),
-            damage:         15*(1+this.powerCurve),
-            exp:            15,
-            lookTo:         "right",
+            speed:     256,
+            health:    50*(1+this.powerCurve*2),
+            stunTime:  400*(1-this.powerCurve),
+            damage:    15*(1+this.powerCurve),
+            exp:       15,
+            lookTo:    "right",
         }
     }
 }
@@ -99,12 +108,12 @@ class Slime extends Enemy {
         super(scene, x, y, "slime");
         this.powerCurve=scene.playerData.level*0.05;
         this.properties = {
-            speed:          96,
-            health:         140*(1+this.powerCurve*2),
-            stunTime:       200*(1-this.powerCurve),
-            damage:         5*(1+this.powerCurve),
-            exp:            5,
-            lookTo:         "right",
+            speed:     96,
+            health:    140*(1+this.powerCurve*2),
+            stunTime:  200*(1-this.powerCurve),
+            damage:    5*(1+this.powerCurve),
+            exp:       5,
+            lookTo:    "right",
         }
     }
 }
@@ -114,12 +123,12 @@ class Skeleton extends Enemy {
         super(scene, x, y, "skeleton");
         this.powerCurve=scene.playerData.level*0.05;
         this.properties = {
-            speed:          128,
-            health:         80*(1+this.powerCurve*2),
-            stunTime:       100*(1-this.powerCurve),
-            damage:         10*(1+this.powerCurve),
-            exp:            7,
-            lookTo:         "left",
+            speed:     128,
+            health:    80*(1+this.powerCurve*2),
+            stunTime:  100*(1-this.powerCurve),
+            damage:    10*(1+this.powerCurve),
+            exp:       7,
+            lookTo:    "left",
         }
     }
 }
@@ -129,24 +138,24 @@ class Zombie extends Enemy {
         super(scene, x, y, "zombie");
         this.powerCurve=scene.playerData.level*0.05;
         this.properties = {
-            speed:          100,
-            health:         100*(1+this.powerCurve*2),
-            stunTime:       300*(1-this.powerCurve),
-            damage:         12*(1+this.powerCurve),
-            exp:            10,
-            lookTo:         "right",
+            speed:     100,
+            health:    100*(1+this.powerCurve*2),
+            stunTime:  300*(1-this.powerCurve),
+            damage:    12*(1+this.powerCurve),
+            exp:       10,
+            lookTo:    "right",
         }
     }
 }
 
-class Exp{
-    constructor(scene, x, y, amount=10){
-        this.scene=scene;
-        this.expOrb=scene.add.sprite(x, y, "expOrb").setScale(0.2);
-        this.expOrb.setData("quantity",amount);
-        scene.physics.add.existing(this.expOrb);
-        this.expOrb.body.immovable = true;
-        scene.expOrbs.add(this.expOrb);
-        scene.exps.push(this.expOrb);
-    }
+class Exp {
+	constructor(scene, x, y, amount = 10) {
+		this.scene = scene;
+		this.expOrb = scene.add.sprite(x, y, "expOrb").setScale(0.2);
+		this.expOrb.setData("quantity", amount);
+		scene.physics.add.existing(this.expOrb);
+		this.expOrb.body.immovable = true;
+		scene.expOrbs.add(this.expOrb);
+		scene.exps.push(this.expOrb);
+	}
 }

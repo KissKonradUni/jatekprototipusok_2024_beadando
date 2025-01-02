@@ -12,7 +12,6 @@
             "healInterval":5000,
             "maxHealth":100    
         },
-
         {
             "expNeeded":300,
             "waveInterval":7000,

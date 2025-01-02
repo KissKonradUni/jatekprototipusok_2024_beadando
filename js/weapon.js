@@ -1,3 +1,4 @@
+
 class Sword {
 
     constructor(scene) {
@@ -14,28 +15,27 @@ class Sword {
         scene.weaponAttacks.add(this.weaponSprite);
         this.weaponSprite.body.setCircle(this.weaponSprite.width, 0, -this.weaponSprite.width / 2);
 
-        // hide the weapon sprite by default
-        this.weaponSprite.setVisible(false);
-        this.weaponSprite.body.enable = false;
+
+		// hide the weapon sprite by default
+		this.weaponSprite.setVisible(false);
+		this.weaponSprite.body.enable = false;
 
         // create timer for weapon attack interval
         this.createTimer();
     }
+	attack() {
+		const player = this.scene.player;
+		this.weaponSprite.copyPosition(player);
+		this.timeOffset = this.scene.time.now;
 
-    attack() {
-        const player = this.scene.player;
-        this.weaponSprite.copyPosition(player);
-        this.timeOffset = this.scene.time.now;
+		this.weaponSprite.setVisible(true);
+		this.weaponSprite.body.enable = true;
 
-        this.weaponSprite.setVisible(true);
-        this.weaponSprite.body.enable = true;
-
-        this.scene.time.delayedCall(this.properties.attackLength, () => {
-            this.weaponSprite.setVisible(false);
-            this.weaponSprite.body.enable = false;
-        });
-    }
-
+		this.scene.time.delayedCall(this.properties.attackLength, () => {
+			this.weaponSprite.setVisible(false);
+			this.weaponSprite.body.enable = false;
+		});
+	}
     update() {
         this.weaponSprite.rotation = 0.031415 * (this.scene.time.now - this.timeOffset);
 
@@ -45,12 +45,10 @@ class Sword {
         const direction = this.weaponSprite.rotation - 0.5;
         const distance = this.properties.attackRange;
 
-        const x = player.x + distance * Math.cos(direction);
-        const y = player.y + distance * Math.sin(direction);
-
+		const x = player.x + distance * Math.cos(direction);
+		const y = player.y + distance * Math.sin(direction);
         this.weaponSprite.setPosition(x, y);
-    }
-
+	}
     levelUp() {
         if (this.level < 5)
             this.level++;
@@ -59,7 +57,6 @@ class Sword {
         this.scene.time.removeEvent(this.attackTimer);
         this.createTimer();
     }
-
     createTimer(){
         this.attackTimer = this.scene.time.addEvent({
             delay: this.properties.attackInterval,
@@ -223,5 +220,4 @@ class Knife {
             loop: true,
         });
     }
-
 }
