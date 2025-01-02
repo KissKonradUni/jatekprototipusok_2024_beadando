@@ -85,5 +85,8 @@
             "attackDamage":30
         }
         
-    ]   
+    ],
+
+    "shotgun":[],
+    "meteor":[]
 }

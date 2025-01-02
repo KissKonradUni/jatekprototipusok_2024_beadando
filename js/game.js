@@ -162,20 +162,8 @@ class GameScene extends Phaser.Scene {
 
     create() {
 
-        //level up weapons in inventory
-        this.input.keyboard.on('keydown-T', (event) => {
-            console.log(event);
-            if (event.keyCode === Phaser.Input.Keyboard.KeyCodes.T) {
-                for (let weapon of this.playerData.inventory) {
-                    weapon.levelUp();
-                }
-            }
-        }, this);
-
-        this.levelData = this.cache.json.get('levelData');
         this.weaponData = this.cache.json.get('weapons');
-        if (!this.anims.exists("rDown"))
-            this.createAnimetions();
+        this.levelData = this.cache.json.get('levelData');
 
         this.playerData = {
             health: 100.0,
@@ -191,6 +179,20 @@ class GameScene extends Phaser.Scene {
             lastDamage: 0,
         }
         this.playerData.maxHealth = this.levelData.levels[this.playerData.level].maxHealth;
+
+        //level up weapons in inventory
+        this.input.keyboard.on('keydown-T', (event) => {
+            if (event.keyCode === Phaser.Input.Keyboard.KeyCodes.T) {
+                this.scene.switch("LevelUp");
+            }
+        }, this);
+
+
+
+        if (!this.anims.exists("rDown"))
+            this.createAnimetions();
+
+
 
         // Background
         // Infinite map was a bad idea, just make it big enough
@@ -241,8 +243,6 @@ class GameScene extends Phaser.Scene {
 
         // Example setup for weapon attacks
         this.weaponAttacks = this.add.group();
-        //this.playerData.inventory.push(new Sword(this));
-        //this.playerData.inventory.push(new SpinningBlades(this));
         this.playerData.inventory.push(new Knife(this));
 
         //Enemy setup
@@ -256,9 +256,9 @@ class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.enemyObjects, this.enemyObjects);
         this.physics.add.collider(this.weaponAttacks, this.enemyObjects, (weapon, enemy) => {
             enemy.wrapper.damage(weapon.wrapper.properties.attackDamage);
-            if(weapon.wrapper.name=="Knife")
-                if(weapon.wrapper.throwable==0)
-                    weapon.wrapper.isDisabled=true;
+            if (weapon.wrapper.name == "Knife")
+                if (weapon.wrapper.throwable == 0)
+                    weapon.wrapper.isDisabled = true;
                 else
                     weapon.wrapper.attack();
         });
@@ -268,9 +268,11 @@ class GameScene extends Phaser.Scene {
     }
 
     init() {
+        this.equpmentLevels = { sword: 0, blade: 0, knife: 1 };
         this.lastMovment = "d";
         this.moveEnabled = true;
-
+        this.registry.set("equipment", this.equpmentLevels);
+        this.registry.set("ToUpgrade", null);
     }
 
     update() {
@@ -278,7 +280,7 @@ class GameScene extends Phaser.Scene {
 
         //closest enemy to player
         this.closest = this.physics.closest(this.player, this.enemies.map(a => a.enemyObject));
-        
+
         //update attribute panel
         this.healtText.setText("Health: " + this.playerData.health + "/" + this.playerData.maxHealth);
         this.levelText.setText("Level: " + this.playerData.level);
@@ -296,6 +298,9 @@ class GameScene extends Phaser.Scene {
         if (this.keyIn.restart.isDown) {
             this.scene.restart();
         }
+
+        if (this.registry.get("ToUpgrade") != null)
+            this.levelUp();
     }
 
     updatePlayerMovement() {
@@ -595,7 +600,6 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    //TODO: boss spawn
     setEnemySpawn() {
         this.time.addEvent({
             delay: this.levelData.levels[this.playerData.level].waveInterval,
@@ -629,7 +633,6 @@ class GameScene extends Phaser.Scene {
 
     }
 
-    //create specific enemy based on monsterType variable
     createEnemy(x, y, monsterType) {
         let enemy;
         switch (monsterType) {
@@ -672,17 +675,130 @@ class GameScene extends Phaser.Scene {
         this.setSelfRecovery();
         this.setEnemySpawn();
 
+        let toUpgrade = this.registry.get("ToUpgrade");
+        if (toUpgrade != null) {
+            switch (toUpgrade) {
+                case "Sword":
+                    this.equpmentLevels.sword++;
+                    break;
+                case "Blade":
+                    this.equpmentLevels.blade++;
+                    break;
+                case "Knife":
+                    this.equpmentLevels.knife++;
+                    break;
+            }
+            this.registry.set("equipment", this.equpmentLevels);
+            this.registry.set("ToUpgrade", null);
+            this.equpmentUpgrade(toUpgrade);
+        }
+
         console.log("Level up: " + this.playerData.level);
+    }
+
+    equpmentUpgrade(name) {
+        switch (name) {
+            case "Sword":
+                if (this.equpmentLevels.sword == 1)
+                    this.playerData.inventory.push(new Sword(this));
+                else {
+                    for (let weapon of this.playerData.inventory) {
+                        if (weapon.name == name) {
+                            weapon.levelUp();
+                        }
+                    }
+                }
+                break;
+            case "Blade":
+                if (this.equpmentLevels.blade == 1)
+                    this.playerData.inventory.push(new SpinningBlades(this));
+                else {
+                    for (let weapon of this.playerData.inventory) {
+                        if (weapon.name == name) {
+                            weapon.levelUp();
+                        }
+                    }
+                }
+                break;
+            case "Knife":
+                if (this.equpmentLevels.knife == 1)
+                    this.playerData.inventory.push(new Knife(this));
+                else {
+                    for (let weapon of this.playerData.inventory) {
+                        if (weapon.name == name) {
+                            weapon.levelUp();
+                        }
+                    }
+                }
+                break;
+        }
     }
 
 }
 
+class LevelUpScene extends Phaser.Scene {
+    preload() {
+        this.load.image("Sword_1", "assets/weapons/sword_1.png");
+        this.load.image("Shuriken", "assets/weapons/Shuriken.png");
+        this.load.image("bGround", "assets/img/levelUpBG.png");
+    }
+
+    init() {
+    }
+
+    create() {
+        this.graphics = this.add.graphics();
+        this.graphics.fillStyle(0xffffff);
+        this.background = this.add.sprite(0, 0, "bGround").setOrigin(0, 0).setScale(0.45);
+
+
+        this.graphics.fillRoundedRect(950, 75, 300, 150, 50);
+        this.add.rectangle(1100, 150, 300, 150).setInteractive().on("pointerdown", () => {
+            this.registry.set("ToUpgrade", "Sword");
+            this.scene.switch("Game");
+        });
+        this.graphics.fillRoundedRect(950, 275, 300, 150, 50);
+        this.add.rectangle(1100, 350, 300, 150).setInteractive().on("pointerdown", () => {
+            this.registry.set("ToUpgrade", "Blade");
+            this.scene.switch("Game");
+
+        });
+        this.graphics.fillRoundedRect(950, 475, 300, 150, 50);
+        this.add.rectangle(1100, 550, 300, 150).setInteractive().on("pointerdown", () => {
+            this.registry.set("ToUpgrade", "Knife");
+            this.scene.switch("Game");
+        });
+
+        this.add.sprite(1025, 150, "Sword_1").setScale(2);
+        this.add.text(1090, 110, "Sword", { color: "x000", fontSize: "34px" }).setDepth(1);
+        this.swordText = this.add.text(1110, 160, "1 -> 2", { color: "x000", fontSize: "20px" }).setDepth(1);
+
+        this.add.sprite(1025, 350, "Shuriken").setScale(0.045);
+        this.add.text(1090, 300, ["Spinning", "Blade"], { color: "x000", fontSize: "30px" }).setDepth(1);
+        this.bladeText = this.add.text(1110, 370, "1 -> 2", { color: "x000", fontSize: "20px" }).setDepth(1);
+
+        this.add.sprite(1025, 550, "Sword_1").setScale(2);
+        this.add.text(1090, 510, "Knife", { color: "x000", fontSize: "34px" }).setDepth(1);
+        this.knifeText = this.add.text(1110, 560, "1 -> 2", { color: "x000", fontSize: "20px" }).setDepth(1);
+    }
+
+    update() {
+        this.levels = this.registry.get("equipment");
+        this.swordText.setText(this.levels.sword + " -> " + (this.levels.sword + 1));
+        this.bladeText.setText(this.levels.blade + " -> " + (this.levels.blade + 1));
+        this.knifeText.setText(this.levels.knife + " -> " + (this.levels.knife + 1));
+    }
+}
+
+
 const gameScene = new GameScene("Game");
+const levelUpScene = new LevelUpScene("LevelUp");
 const game = new Phaser.Game({
     width: screenSize.x,
     height: screenSize.y,
     scene: [
         gameScene,
+        levelUpScene,
     ],
     physics: {
         default: "arcade",

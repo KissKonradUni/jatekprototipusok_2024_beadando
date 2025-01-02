@@ -77,8 +77,8 @@ class SpinningBlades {
     constructor(scene) {
         this.scene = scene;
         this.level = 1;
-        this.properties = this.scene.weaponData.SpinningBlade[this.level-1];
-        this.name = "Spinning Blade";
+        this.properties = this.scene.weaponData.spinningBlade[this.level-1];
+        this.name = "Blade";
         this.properties.attackRange = 100;
         this.wrapper = this;
 
