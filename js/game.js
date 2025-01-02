@@ -753,18 +753,18 @@ class LevelUpScene extends Phaser.Scene {
 
 
         this.graphics.fillRoundedRect(950, 75, 300, 150, 50);
-        this.add.rectangle(1100, 150, 300, 150).setInteractive().on("pointerdown", () => {
+        this.choice_1 = this.add.rectangle(1100, 150, 300, 150).setInteractive().on("pointerdown", () => {
             this.registry.set("ToUpgrade", "Sword");
             this.scene.switch("Game");
         });
         this.graphics.fillRoundedRect(950, 275, 300, 150, 50);
-        this.add.rectangle(1100, 350, 300, 150).setInteractive().on("pointerdown", () => {
+        this.choice_2 = this.add.rectangle(1100, 350, 300, 150).setInteractive().on("pointerdown", () => {
             this.registry.set("ToUpgrade", "Blade");
             this.scene.switch("Game");
 
         });
         this.graphics.fillRoundedRect(950, 475, 300, 150, 50);
-        this.add.rectangle(1100, 550, 300, 150).setInteractive().on("pointerdown", () => {
+        this.choice_3 = this.add.rectangle(1100, 550, 300, 150).setInteractive().on("pointerdown", () => {
             this.registry.set("ToUpgrade", "Knife");
             this.scene.switch("Game");
         });
@@ -784,9 +784,25 @@ class LevelUpScene extends Phaser.Scene {
 
     update() {
         this.levels = this.registry.get("equipment");
-        this.swordText.setText(this.levels.sword + " -> " + (this.levels.sword + 1));
-        this.bladeText.setText(this.levels.blade + " -> " + (this.levels.blade + 1));
-        this.knifeText.setText(this.levels.knife + " -> " + (this.levels.knife + 1));
+        if (this.levels.sword == 5) {
+            this.swordText.setText("MAX");
+            this.choice_1.disableInteractive();
+
+        } else
+            this.swordText.setText(this.levels.sword + " -> " + (this.levels.sword + 1));
+
+        if (this.levels.blade == 5) {
+            this.bladeText.setText("MAX");
+            this.choice_2.disableInteractive();
+
+        } else
+            this.bladeText.setText(this.levels.blade + " -> " + (this.levels.blade + 1));
+        if (this.levels.knife == 5) {
+            this.knifeText.setText("MAX");
+            this.choice_3.disableInteractive();
+
+        } else
+            this.knifeText.setText(this.levels.knife + " -> " + (this.levels.knife + 1));
     }
 }
 
