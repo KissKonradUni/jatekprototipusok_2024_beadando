@@ -210,14 +210,25 @@ class GameScene extends Phaser.Scene {
 		this.player.body.setCollideWorldBounds(true);
 
 		//Data panels
+		this.healthBar = this.add.rectangle(115, 70, 202, 22, 0x000000).setOrigin(0, 0).setScrollFactor(0, 0);
+		this.healthBarFill = this.add.rectangle(116, 71, 200, 20, 0xff0000).setOrigin(0, 0).setScrollFactor(0, 0);
 		this.healtText = this.add
-			.text(115, 70, "Health:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.text(120, 72, "100/100", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
 			.setScrollFactor(0, 0);
+
 		this.levelText = this.add
-			.text(115, 95, "Level:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.text(115, 95, "Stage:", { fontSize: "20px", strokeThickness: 0, stroke: "", color: "#000" })
 			.setScrollFactor(0, 0);
+		
+		this.expBar = this.add.rectangle(439, 70, 402, 12, 0x000000).setOrigin(0, 0).setScrollFactor(0, 0);
+		this.expBarFill = this.add.rectangle(440, 71, 400, 10, 0x0088ff).setOrigin(0, 0).setScrollFactor(0, 0);
 		this.expText = this.add
-			.text(115, 120, "Exp:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.text(440, 85, "XP: ", { fontSize: "20px", strokeThickness: 0, stroke: "", color: "#000" })
+			.setScrollFactor(0, 0);
+
+		this.levelUpText = this.add
+			.text(640, 120, "Press 'T' to level up", { fontSize: "20px", strokeThickness: 2, stroke: "#000", color: "#fff", align: "center" })
+			.setOrigin(0.5, 0)
 			.setScrollFactor(0, 0);
 
 		// WASD Movement
@@ -292,9 +303,15 @@ class GameScene extends Phaser.Scene {
         this.closest = this.physics.closest(this.player, this.enemies.map(a => a.enemyObject));
 
         //update attribute panel
-        this.healtText.setText("Health: " + this.playerData.health + "/" + this.playerData.maxHealth);
-        this.levelText.setText("Level: " + this.playerData.level);
-        this.expText.setText("Exp: " + this.playerData.experience + "/" + this.levelData.levels[this.playerData.level].expNeeded);
+        this.healtText.setText(this.playerData.health.toFixed(0) + "/" + this.playerData.maxHealth.toFixed(0));
+		this.healthBarFill.width = Math.min(Math.max(200 * (this.playerData.health / this.playerData.maxHealth), 0), 200);
+
+        this.levelText.setText("Stage: " + this.playerData.level);
+        
+		this.expText.setText("XP: " + this.playerData.experience + "/" + this.levelData.levels[this.playerData.level].expNeeded);
+		this.expBarFill.width = Math.min(Math.max(400 * (this.playerData.experience / this.levelData.levels[this.playerData.level].expNeeded), 0), 400);
+
+		this.levelUpText.setVisible(this.playerData.experience >= this.levelData.levels[this.playerData.level].expNeeded);
 
         for (let enemy of this.enemies) {
             enemy.update();
@@ -306,7 +323,7 @@ class GameScene extends Phaser.Scene {
 
         // Restart scene (for debugging)
         if (this.keyIn.restart.isDown) {
-            this.scene.restart();
+            //this.scene.restart();
         }
 
         if (this.registry.get("ToUpgrade") != null)
@@ -397,7 +414,7 @@ class GameScene extends Phaser.Scene {
             }
             this.player.on('animationcomplete', () => {
                 this.registry.set("ToUpgrade", null);
-				this.scene.restart();
+				this.scene.switch("MainMenu");
             });
         } else {
             switch (this.lastMovment) {
@@ -640,21 +657,41 @@ class LevelUpScene extends Phaser.Scene {
     }
 }
 
+class MainMenuScene extends Phaser.Scene {
+	preload() {
+
+	}
+
+	create() {
+		this.choice_1 = this.add.rectangle(640, 250, 300, 150, 0xffffff).setInteractive().on("pointerdown", () => {
+			gameScene.scene.restart();
+			this.scene.switch("Game");
+		});
+		this.choice_3 = this.add.rectangle(640, 450, 300, 150, 0xffffff).setInteractive().on("pointerdown", () => {
+			window.open("https://github.com/KissKonradUni/jatekprototipusok_2024_beadando", "_blank");
+		});
+		this.add.text(640, 250, "Start", { color: "#000", fontSize: "34px" } ).setDepth(1).setOrigin(0.5, 0.5);
+		this.add.text(640, 450, "GitHub", { color: "#000", fontSize: "34px" }).setDepth(1).setOrigin(0.5, 0.5);
+	}
+}
 
 const gameScene = new GameScene("Game");
 const levelUpScene = new LevelUpScene("LevelUp");
+const mainMenuScene = new MainMenuScene("MainMenu");
+
 const game = new Phaser.Game({
     width: screenSize.x,
     height: screenSize.y,
     scene: [
+		mainMenuScene,
         gameScene,
-        levelUpScene,
+        levelUpScene
     ],
     physics: {
         default: "arcade",
         arcade: {
             gravity: { y: 0 },
-            debug: true,
+            //debug: true,
         },
     },
 });
