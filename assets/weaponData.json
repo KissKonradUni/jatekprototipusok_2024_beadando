@@ -38,27 +38,27 @@
     "Knife":[
         {
             "speed":400,
-            "attackInterval":2000,
+            "attackInterval":1500,
             "attackDamage":10
         },
         {
             "speed":400,
-            "attackInterval":2200,
+            "attackInterval":1300,
             "attackDamage":15
         },
         {
             "speed":400,
-            "attackInterval":2450,
+            "attackInterval":1100,
             "attackDamage":20
         },
         {
             "speed":400,
-            "attackInterval":2500,
+            "attackInterval":900,
             "attackDamage":25
         },
         {
             "speed":400,
-            "attackInterval":2600,
+            "attackInterval":700,
             "attackDamage":35
         }
     ],
