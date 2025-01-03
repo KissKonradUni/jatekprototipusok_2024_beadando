@@ -12,7 +12,39 @@
             "healInterval":5000,
             "maxHealth":100    
         },
-
+        {
+            "expNeeded":300,
+            "waveInterval":7000,
+            "enemies":[
+                {"key":"slime","quantity":5},
+                {"key":"skeleton","quantity":3}
+            ],
+            "healAmount":2,
+            "healInterval":4900,
+            "maxHealth":120    
+        },
+        {
+            "expNeeded":300,
+            "waveInterval":7000,
+            "enemies":[
+                {"key":"slime","quantity":5},
+                {"key":"skeleton","quantity":3}
+            ],
+            "healAmount":2,
+            "healInterval":4900,
+            "maxHealth":120    
+        },
+        {
+            "expNeeded":300,
+            "waveInterval":7000,
+            "enemies":[
+                {"key":"slime","quantity":5},
+                {"key":"skeleton","quantity":3}
+            ],
+            "healAmount":2,
+            "healInterval":4900,
+            "maxHealth":120    
+        },
         {
             "expNeeded":300,
             "waveInterval":7000,
