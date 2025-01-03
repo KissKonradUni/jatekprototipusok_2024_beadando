@@ -183,16 +183,19 @@ class GameScene extends Phaser.Scene {
         //level up weapons in inventory
         this.input.keyboard.on('keydown-T', (event) => {
             if (event.keyCode === Phaser.Input.Keyboard.KeyCodes.T) {
-                this.scene.switch("LevelUp");
+                // Check if the player has enough experience to level up
+				let canLevelUp = this.playerData.experience >= this.levelData.levels[this.playerData.level].expNeeded;
+				
+				// Check if every weapon is maxed out (sum = 15)
+				let allMaxed = this.playerData.inventory.map(weapon => weapon.level).reduce((a, b) => a + b, 0) == 15;
+			
+				if (canLevelUp && !allMaxed)
+					this.scene.switch("LevelUp");
             }
         }, this);
 
-
-
         if (!this.anims.exists("rDown"))
             this.createAnimetions();
-
-
 
 		// Background
 		// Infinite map was a bad idea, just make it big enough
@@ -207,14 +210,25 @@ class GameScene extends Phaser.Scene {
 		this.player.body.setCollideWorldBounds(true);
 
 		//Data panels
+		this.healthBar = this.add.rectangle(115, 70, 202, 22, 0x000000).setOrigin(0, 0).setScrollFactor(0, 0);
+		this.healthBarFill = this.add.rectangle(116, 71, 200, 20, 0xff0000).setOrigin(0, 0).setScrollFactor(0, 0);
 		this.healtText = this.add
-			.text(115, 70, "Health:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.text(120, 72, "100/100", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
 			.setScrollFactor(0, 0);
+
 		this.levelText = this.add
-			.text(115, 95, "Level:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.text(115, 95, "Stage:", { fontSize: "20px", strokeThickness: 0, stroke: "", color: "#000" })
 			.setScrollFactor(0, 0);
+		
+		this.expBar = this.add.rectangle(439, 70, 402, 12, 0x000000).setOrigin(0, 0).setScrollFactor(0, 0);
+		this.expBarFill = this.add.rectangle(440, 71, 400, 10, 0x0088ff).setOrigin(0, 0).setScrollFactor(0, 0);
 		this.expText = this.add
-			.text(115, 120, "Exp:", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.text(440, 85, "XP: ", { fontSize: "20px", strokeThickness: 0, stroke: "", color: "#000" })
+			.setScrollFactor(0, 0);
+
+		this.levelUpText = this.add
+			.text(640, 120, "Press 'T' to level up", { fontSize: "20px", strokeThickness: 2, stroke: "#000", color: "#fff", align: "center" })
+			.setOrigin(0.5, 0)
 			.setScrollFactor(0, 0);
 
 		// WASD Movement
@@ -236,8 +250,6 @@ class GameScene extends Phaser.Scene {
 
 		// Camera setup
 		this.camera = this.cameras.main.startFollow(this.player, false).setZoom(1.2);
-        // Camera setup
-        this.camera = this.cameras.main.startFollow(this.player, false).setZoom(1.2);
 
         // Setup exp system
         this.expOrbs = this.add.group();
@@ -246,19 +258,7 @@ class GameScene extends Phaser.Scene {
             this.playerData.experience += orb.getData("quantity");
             console.log(this.playerData.experience);
             orb.destroy();
-            if (this.playerData.experience >= this.levelData.levels[this.playerData.level].expNeeded)
-                this.levelUp();
         });
-
-		// Setup exp system
-		this.expOrbs = this.add.group();
-		this.exps = [];
-		this.physics.add.collider(this.player, this.expOrbs, (player, orb) => {
-			this.playerData.experience += orb.getData("quantity");
-			console.log(this.playerData.experience);
-			orb.destroy();
-			if (this.playerData.experience >= this.levelData.levels[this.playerData.level].expNeeded) this.levelUp();
-		});
 
         // Example setup for weapon attacks
         this.weaponAttacks = this.add.group();
@@ -303,9 +303,15 @@ class GameScene extends Phaser.Scene {
         this.closest = this.physics.closest(this.player, this.enemies.map(a => a.enemyObject));
 
         //update attribute panel
-        this.healtText.setText("Health: " + this.playerData.health + "/" + this.playerData.maxHealth);
-        this.levelText.setText("Level: " + this.playerData.level);
-        this.expText.setText("Exp: " + this.playerData.experience + "/" + this.levelData.levels[this.playerData.level].expNeeded);
+        this.healtText.setText(this.playerData.health.toFixed(0) + "/" + this.playerData.maxHealth.toFixed(0));
+		this.healthBarFill.width = Math.min(Math.max(200 * (this.playerData.health / this.playerData.maxHealth), 0), 200);
+
+        this.levelText.setText("Stage: " + this.playerData.level);
+        
+		this.expText.setText("XP: " + this.playerData.experience + "/" + this.levelData.levels[this.playerData.level].expNeeded);
+		this.expBarFill.width = Math.min(Math.max(400 * (this.playerData.experience / this.levelData.levels[this.playerData.level].expNeeded), 0), 400);
+
+		this.levelUpText.setVisible(this.playerData.experience >= this.levelData.levels[this.playerData.level].expNeeded);
 
         for (let enemy of this.enemies) {
             enemy.update();
@@ -317,7 +323,7 @@ class GameScene extends Phaser.Scene {
 
         // Restart scene (for debugging)
         if (this.keyIn.restart.isDown) {
-            this.scene.restart();
+            //this.scene.restart();
         }
 
         if (this.registry.get("ToUpgrade") != null)
@@ -407,7 +413,8 @@ class GameScene extends Phaser.Scene {
                     break;
             }
             this.player.on('animationcomplete', () => {
-                this.scene.restart();
+                this.registry.set("ToUpgrade", null);
+				this.scene.switch("MainMenu");
             });
         } else {
             switch (this.lastMovment) {
@@ -433,10 +440,6 @@ class GameScene extends Phaser.Scene {
         console.log("AUGH! " + this.playerData.health);
     }
 
-	createAnimetions() {
-		Animations.init.bind(this)();
-	}
-
 	//TODO: boss spawn
 	setEnemySpawn() {
 		this.time.addEvent({
@@ -457,6 +460,11 @@ class GameScene extends Phaser.Scene {
 			delay: 50,
 			repeat: numberOfSpawn,
 			callback: () => {
+				if (this.enemies.length >= 20) {
+					console.log("Too many enemies!");
+					return;
+				}
+
 				console.log("Add enemy:" + monsterType);
 				var x = Math.random() * screenSize.x;
 				var y = Math.random() * screenSize.y;
@@ -502,90 +510,16 @@ class GameScene extends Phaser.Scene {
 		});
 	}
 
-	levelUp() {
-		this.playerData.experience -= this.levelData.levels[this.playerData.level].expNeeded;
-		this.playerData.level++;
-		this.playerData.maxHealth = this.levelData.levels[this.playerData.level].maxHealth;
-		this.time.removeEvent(this.waveTimer);
-		this.time.removeEvent(this.recoveryTimer);
-		this.setSelfRecovery();
-		this.setEnemySpawn();
-
-		console.log("Level up: " + this.playerData.level);
-	}
     createAnimetions() {
 		Animations.init.bind(this)();
 	}
 
-    setEnemySpawn() {
-        this.time.addEvent({
-            delay: this.levelData.levels[this.playerData.level].waveInterval,
-            repeat: -1,
-            callback: () => {
-                console.log("New wave!");
-                this.levelData.levels[this.playerData.level].enemies.forEach(element => {
-                    this.spawnWaveOf(element.quantity - 1, element.key);
-                });
-                //
-            }
-        });
-    }
-
-    spawnWaveOf(numberOfSpawn, monsterType) {
-        this.waveTimer = this.time.addEvent({
-            delay: 50,
-            repeat: numberOfSpawn,
-            callback: () => {
-                console.log("Add enemy:" + monsterType);
-                var x = Math.random() * screenSize.x;
-                var y = Math.random() * screenSize.y;
-                while ((x - this.player.x) * (x - this.player.x) + (y - this.player.y) * (y - this.player.y) < 250) {
-                    x = Math.random() * screenSize.x;
-                    y = Math.random() * screenSize.y;
-                }
-                this.createEnemy(x, y, monsterType);
-
-            }
-        });
-
-    }
-
-    createEnemy(x, y, monsterType) {
-        let enemy;
-        switch (monsterType) {
-            case "slime":
-                enemy = new Slime(this, x, y, monsterType);
-                break;
-            case "hound":
-                enemy = new Hound(this, x, y, monsterType);
-                break;
-            case "zombie":
-                enemy = new Zombie(this, x, y, monsterType);
-                break;
-            case "skeleton":
-                enemy = new Skeleton(this, x, y, monsterType);
-                break;
-        }
-        this.enemies.push(enemy);
-        this.enemyObjects.add(enemy.enemyObject);
-    }
-
-    setSelfRecovery() {
-        this.recoveryTimer = this.time.addEvent({
-            delay: this.levelData.levels[this.playerData.level].healInterval,
-            repeat: -1,
-            callback: () => {
-                this.playerData.health += this.levelData.levels[this.playerData.level].healAmount;
-                if (this.playerData.health > this.playerData.maxHealth)
-                    this.playerData.health = this.playerData.maxHealth;
-                console.log("Healin: " + this.playerData.health);
-            }
-        });
-    }
-
     levelUp() {
         this.playerData.experience -= this.levelData.levels[this.playerData.level].expNeeded;
         this.playerData.level++;
+		if (this.playerData.level >= this.levelData.levels.length) {
+			this.playerData.level = this.levelData.levels.length - 1;
+		}
         this.playerData.maxHealth = this.levelData.levels[this.playerData.level].maxHealth;
         this.time.removeEvent(this.waveTimer);
         this.time.removeEvent(this.recoveryTimer);
@@ -723,21 +657,41 @@ class LevelUpScene extends Phaser.Scene {
     }
 }
 
+class MainMenuScene extends Phaser.Scene {
+	preload() {
+
+	}
+
+	create() {
+		this.choice_1 = this.add.rectangle(640, 250, 300, 150, 0xffffff).setInteractive().on("pointerdown", () => {
+			gameScene.scene.restart();
+			this.scene.switch("Game");
+		});
+		this.choice_3 = this.add.rectangle(640, 450, 300, 150, 0xffffff).setInteractive().on("pointerdown", () => {
+			window.open("https://github.com/KissKonradUni/jatekprototipusok_2024_beadando", "_blank");
+		});
+		this.add.text(640, 250, "Start", { color: "#000", fontSize: "34px" } ).setDepth(1).setOrigin(0.5, 0.5);
+		this.add.text(640, 450, "GitHub", { color: "#000", fontSize: "34px" }).setDepth(1).setOrigin(0.5, 0.5);
+	}
+}
 
 const gameScene = new GameScene("Game");
 const levelUpScene = new LevelUpScene("LevelUp");
+const mainMenuScene = new MainMenuScene("MainMenu");
+
 const game = new Phaser.Game({
     width: screenSize.x,
     height: screenSize.y,
     scene: [
+		mainMenuScene,
         gameScene,
-        levelUpScene,
+        levelUpScene
     ],
     physics: {
         default: "arcade",
         arcade: {
             gravity: { y: 0 },
-            debug: true,
+            //debug: true,
         },
     },
 });

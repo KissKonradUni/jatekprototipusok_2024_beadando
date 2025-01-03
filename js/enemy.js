@@ -91,7 +91,7 @@ class Enemy {
 class Hound extends Enemy {
     constructor(scene, x, y) {
         super(scene, x, y, "hound");
-        this.powerCurve=scene.playerData.level*0.05;
+        this.powerCurve=scene.playerData.level*0.3;
         this.properties = {
             speed:     256,
             health:    50*(1+this.powerCurve*2),
@@ -106,10 +106,10 @@ class Hound extends Enemy {
 class Slime extends Enemy {
     constructor(scene, x, y) {
         super(scene, x, y, "slime");
-        this.powerCurve=scene.playerData.level*0.05;
+        this.powerCurve=scene.playerData.level*0.3;
         this.properties = {
             speed:     96,
-            health:    140*(1+this.powerCurve*2),
+            health:    20*(1+this.powerCurve*2),
             stunTime:  200*(1-this.powerCurve),
             damage:    5*(1+this.powerCurve),
             exp:       5,
@@ -121,10 +121,10 @@ class Slime extends Enemy {
 class Skeleton extends Enemy {
     constructor(scene, x, y) {
         super(scene, x, y, "skeleton");
-        this.powerCurve=scene.playerData.level*0.05;
+        this.powerCurve=scene.playerData.level*0.3;
         this.properties = {
             speed:     128,
-            health:    80*(1+this.powerCurve*2),
+            health:    35*(1+this.powerCurve*2),
             stunTime:  100*(1-this.powerCurve),
             damage:    10*(1+this.powerCurve),
             exp:       7,
@@ -136,10 +136,10 @@ class Skeleton extends Enemy {
 class Zombie extends Enemy {
     constructor(scene, x, y) {
         super(scene, x, y, "zombie");
-        this.powerCurve=scene.playerData.level*0.05;
+        this.powerCurve=scene.playerData.level*0.3;
         this.properties = {
             speed:     100,
-            health:    100*(1+this.powerCurve*2),
+            health:    50*(1+this.powerCurve*2),
             stunTime:  300*(1-this.powerCurve),
             damage:    12*(1+this.powerCurve),
             exp:       10,
@@ -154,7 +154,7 @@ class Exp {
 		this.expOrb = scene.add.sprite(x, y, "expOrb").setScale(0.2);
 		this.expOrb.setData("quantity", amount);
 		scene.physics.add.existing(this.expOrb);
-		this.expOrb.body.immovable = true;
+		//this.expOrb.body.immovable = true;
 		scene.expOrbs.add(this.expOrb);
 		scene.exps.push(this.expOrb);
 	}

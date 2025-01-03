@@ -1,60 +1,63 @@
 {
     "levels": [
         {
-            "expNeeded":150,
+            "expNeeded": 40,
             "waveInterval":5000,
             "enemies":[
                 {"key":"slime","quantity":3},
-                {"key":"skeleton","quantity":1},
-                {"key":"hound","quantity":1}
+                {"key":"skeleton","quantity":1}
             ],
             "healAmount":1,
             "healInterval":5000,
             "maxHealth":100    
         },
         {
-            "expNeeded":300,
-            "waveInterval":7000,
+            "expNeeded": 120,
+            "waveInterval":6000,
             "enemies":[
                 {"key":"slime","quantity":5},
-                {"key":"skeleton","quantity":3}
+                {"key":"skeleton","quantity":3},
+                {"key":"hound","quantity":1}
             ],
             "healAmount":2,
-            "healInterval":4900,
+            "healInterval":4700,
             "maxHealth":120    
         },
         {
-            "expNeeded":300,
+            "expNeeded": 200,
             "waveInterval":7000,
             "enemies":[
-                {"key":"slime","quantity":5},
-                {"key":"skeleton","quantity":3}
+                {"key":"slime","quantity":4},
+                {"key":"skeleton","quantity":4},
+                {"key":"hound","quantity":1}
             ],
-            "healAmount":2,
-            "healInterval":4900,
-            "maxHealth":120    
+            "healAmount":3,
+            "healInterval":4500,
+            "maxHealth":140    
         },
         {
-            "expNeeded":300,
-            "waveInterval":7000,
+            "expNeeded": 300,
+            "waveInterval":8000,
             "enemies":[
-                {"key":"slime","quantity":5},
-                {"key":"skeleton","quantity":3}
+                {"key":"zombie","quantity":2},
+                {"key":"skeleton","quantity":5},
+                {"key":"hound","quantity":2}
             ],
-            "healAmount":2,
-            "healInterval":4900,
-            "maxHealth":120    
+            "healAmount":4,
+            "healInterval":4250,
+            "maxHealth":170    
         },
         {
-            "expNeeded":300,
-            "waveInterval":7000,
+            "expNeeded": 350,
+            "waveInterval":9000,
             "enemies":[
-                {"key":"slime","quantity":5},
-                {"key":"skeleton","quantity":3}
+                {"key":"zombie","quantity":3},
+                {"key":"skeleton","quantity":6},
+                {"key":"hound","quantity":3}
             ],
-            "healAmount":2,
-            "healInterval":4900,
-            "maxHealth":120    
+            "healAmount":5,
+            "healInterval":4000,
+            "maxHealth":200  
         }
     ]
 }
