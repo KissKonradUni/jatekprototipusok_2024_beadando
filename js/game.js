@@ -158,6 +158,10 @@ class GameScene extends Phaser.Scene {
             spacing: 0
         });
 
+        this.load.image("HealthBarBg", "assets/img/healthBarBg.png");
+        this.load.image("HealthBarFill", "assets/img/healthBarFill.png");
+        this.load.image("ExpBarBg", "assets/img/XPBarBg.png");
+        this.load.image("ExpBarFill", "assets/img/XPBarFill.png");
     }
 
     create() {
@@ -210,18 +214,23 @@ class GameScene extends Phaser.Scene {
 		this.player.body.setCollideWorldBounds(true);
 
 		//Data panels
-		this.healthBar = this.add.rectangle(115, 70, 202, 22, 0x000000).setOrigin(0, 0).setScrollFactor(0, 0);
-		this.healthBarFill = this.add.rectangle(116, 71, 200, 20, 0xff0000).setOrigin(0, 0).setScrollFactor(0, 0);
+		//this.healthBar = this.add.rectangle(115, 70, 202, 22, 0x000000).setOrigin(0, 0).setScrollFactor(0, 0);
+		//this.healthBarFill = this.add.rectangle(116, 71, 200, 20, 0xff0000).setOrigin(0, 0).setScrollFactor(0, 0);
+        this.healthBar = this.add.sprite(115, 70, "HealthBarBg").setOrigin(0, 0).setScrollFactor(0, 0).setDepth(1);
+        this.healthBarFill = this.add.sprite(115, 70, "HealthBarFill").setOrigin(0, 0).setScrollFactor(0, 0).setDepth(1);
 		this.healtText = this.add
-			.text(120, 72, "100/100", { fontSize: "20px", strokeThickness: 1, stroke: "#000", color: "#fff" })
-			.setScrollFactor(0, 0);
+			.text(121, 74, "100/100", { fontSize: "16px", strokeThickness: 1, stroke: "#000", color: "#fff" })
+			.setScrollFactor(0, 0)
+            .setDepth(1);
 
 		this.levelText = this.add
 			.text(115, 95, "Stage:", { fontSize: "20px", strokeThickness: 0, stroke: "", color: "#000" })
 			.setScrollFactor(0, 0);
 		
-		this.expBar = this.add.rectangle(439, 70, 402, 12, 0x000000).setOrigin(0, 0).setScrollFactor(0, 0);
-		this.expBarFill = this.add.rectangle(440, 71, 400, 10, 0x0088ff).setOrigin(0, 0).setScrollFactor(0, 0);
+		//this.expBar = this.add.rectangle(439, 70, 402, 12, 0x000000).setOrigin(0, 0).setScrollFactor(0, 0);
+		//this.expBarFill = this.add.rectangle(440, 71, 400, 10, 0x0088ff).setOrigin(0, 0).setScrollFactor(0, 0);
+        this.expBar = this.add.sprite(439, 70, "ExpBarBg").setOrigin(0, 0).setScrollFactor(0, 0).setDepth(1);
+        this.expBarFill = this.add.sprite(439, 70, "ExpBarFill").setOrigin(0, 0).setScrollFactor(0, 0).setDepth(1);
 		this.expText = this.add
 			.text(440, 85, "XP: ", { fontSize: "20px", strokeThickness: 0, stroke: "", color: "#000" })
 			.setScrollFactor(0, 0);
@@ -304,12 +313,15 @@ class GameScene extends Phaser.Scene {
 
         //update attribute panel
         this.healtText.setText(this.playerData.health.toFixed(0) + "/" + this.playerData.maxHealth.toFixed(0));
-		this.healthBarFill.width = Math.min(Math.max(200 * (this.playerData.health / this.playerData.maxHealth), 0), 200);
+		//this.healthBarFill.width = Math.min(Math.max(200 * (this.playerData.health / this.playerData.maxHealth), 0), 200);
+        this.healthBarFill.setCrop(0, 0, 202 * (this.playerData.health / this.playerData.maxHealth), 22);
 
         this.levelText.setText("Stage: " + this.playerData.level);
         
 		this.expText.setText("XP: " + this.playerData.experience + "/" + this.levelData.levels[this.playerData.level].expNeeded);
-		this.expBarFill.width = Math.min(Math.max(400 * (this.playerData.experience / this.levelData.levels[this.playerData.level].expNeeded), 0), 400);
+		//this.expBarFill.width = Math.min(Math.max(400 * (this.playerData.experience / this.levelData.levels[this.playerData.level].expNeeded), 0), 400);
+        this.expBarFill.setCrop(0, 0, 402 * (this.playerData.experience / this.levelData.levels[this.playerData.level].expNeeded), 12);
+        
 
 		this.levelUpText.setVisible(this.playerData.experience >= this.levelData.levels[this.playerData.level].expNeeded);
 
@@ -466,12 +478,10 @@ class GameScene extends Phaser.Scene {
 				}
 
 				console.log("Add enemy:" + monsterType);
-				var x = Math.random() * screenSize.x;
-				var y = Math.random() * screenSize.y;
-				while ((x - this.player.x) * (x - this.player.x) + (y - this.player.y) * (y - this.player.y) < 250) {
-					x = Math.random() * screenSize.x;
-					y = Math.random() * screenSize.y;
-				}
+                var angle = Math.random() * Math.PI * 2;
+                var distance = Math.random() * screenSize.y / 2 + screenSize.y / 4;
+                var x = Math.cos(angle) * distance + this.player.x;
+                var y = Math.sin(angle) * distance + this.player.y;
 				this.createEnemy(x, y, monsterType);
 			},
 		});
@@ -591,6 +601,7 @@ class LevelUpScene extends Phaser.Scene {
     preload() {
         this.load.image("Sword_1", "assets/weapons/sword_1.png");
         this.load.image("Shuriken", "assets/weapons/Shuriken.png");
+        this.load.image("Kunai", "assets/img/Kunai.png");
         this.load.image("bGround", "assets/img/levelUpBG.png");
     }
 
@@ -600,37 +611,35 @@ class LevelUpScene extends Phaser.Scene {
     create() {
         this.graphics = this.add.graphics();
         this.graphics.fillStyle(0xffffff);
-        this.background = this.add.sprite(0, 0, "bGround").setOrigin(0, 0).setScale(0.45);
+        this.background = this.add.sprite(0, 0, "bGround").setOrigin(0, 0).setScale(1.0);
 
 
-        this.graphics.fillRoundedRect(950, 75, 300, 150, 50);
-        this.choice_1 = this.add.rectangle(1100, 150, 300, 150).setInteractive().on("pointerdown", () => {
+        this.choice_1 = this.add.rectangle(64, 535, 334, 130).setInteractive().on("pointerdown", () => {
             this.registry.set("ToUpgrade", "Sword");
             this.scene.switch("Game");
-        });
-        this.graphics.fillRoundedRect(950, 275, 300, 150, 50);
-        this.choice_2 = this.add.rectangle(1100, 350, 300, 150).setInteractive().on("pointerdown", () => {
+        }).setDepth(2).setOrigin(0, 0);
+
+        this.choice_2 = this.add.rectangle(473, 535, 334, 130).setInteractive().on("pointerdown", () => {
             this.registry.set("ToUpgrade", "Blade");
             this.scene.switch("Game");
+        }).setDepth(2).setOrigin(0, 0);
 
-        });
-        this.graphics.fillRoundedRect(950, 475, 300, 150, 50);
-        this.choice_3 = this.add.rectangle(1100, 550, 300, 150).setInteractive().on("pointerdown", () => {
+        this.choice_3 = this.add.rectangle(882, 535, 334, 130).setInteractive().on("pointerdown", () => {
             this.registry.set("ToUpgrade", "Knife");
             this.scene.switch("Game");
-        });
+        }).setDepth(2).setOrigin(0, 0);
 
-        this.add.sprite(1025, 150, "Sword_1").setScale(2);
-        this.add.text(1090, 110, "Sword", { color: "x000", fontSize: "34px" }).setDepth(1);
-        this.swordText = this.add.text(1110, 160, "1 -> 2", { color: "x000", fontSize: "20px" }).setDepth(1);
+        this.add.sprite(124, 605, "Sword_1").setScale(2);
+        this.add.text(184, 570, "Sword", { color: "x000", fontSize: "34px" }).setDepth(1);
+        this.swordText = this.add.text(184, 610, "1 -> 2", { color: "x000", fontSize: "20px" }).setDepth(1);
 
-        this.add.sprite(1025, 350, "Shuriken").setScale(0.045);
-        this.add.text(1090, 300, ["Spinning", "Blade"], { color: "x000", fontSize: "30px" }).setDepth(1);
-        this.bladeText = this.add.text(1110, 370, "1 -> 2", { color: "x000", fontSize: "20px" }).setDepth(1);
+        this.add.sprite(533, 605, "Shuriken").setScale(0.030);
+        this.add.text(593, 570, ["Shuriken"], { color: "x000", fontSize: "30px" }).setDepth(1);
+        this.bladeText = this.add.text(593, 610, "1 -> 2", { color: "x000", fontSize: "20px" }).setDepth(1);
 
-        this.add.sprite(1025, 550, "Sword_1").setScale(2);
-        this.add.text(1090, 510, "Knife", { color: "x000", fontSize: "34px" }).setDepth(1);
-        this.knifeText = this.add.text(1110, 560, "1 -> 2", { color: "x000", fontSize: "20px" }).setDepth(1);
+        this.add.sprite(942, 605, "Kunai").setScale(2.5);
+        this.add.text(1002, 570, "Kunai", { color: "x000", fontSize: "34px" }).setDepth(1);
+        this.knifeText = this.add.text(1002, 610, "1 -> 2", { color: "x000", fontSize: "20px" }).setDepth(1);
     }
 
     update() {
@@ -638,40 +647,46 @@ class LevelUpScene extends Phaser.Scene {
         if (this.levels.sword == 5) {
             this.swordText.setText("MAX");
             this.choice_1.disableInteractive();
-
-        } else
+        } else {
             this.swordText.setText(this.levels.sword + " -> " + (this.levels.sword + 1));
+            this.choice_1.setInteractive();
+        }
 
         if (this.levels.blade == 5) {
             this.bladeText.setText("MAX");
             this.choice_2.disableInteractive();
-
-        } else
+        } else {
             this.bladeText.setText(this.levels.blade + " -> " + (this.levels.blade + 1));
+            this.choice_2.setInteractive();
+        }
+
         if (this.levels.knife == 5) {
             this.knifeText.setText("MAX");
             this.choice_3.disableInteractive();
-
-        } else
+        } else {
             this.knifeText.setText(this.levels.knife + " -> " + (this.levels.knife + 1));
+            this.choice_3.setInteractive();
+        }
     }
 }
 
 class MainMenuScene extends Phaser.Scene {
 	preload() {
-
+        this.load.image("Title", "assets/img/Title.png");
+        this.load.image("playButton", "assets/img/PlayButton.png");
+        this.load.image("githubButton", "assets/img/GitHubButton.png");
 	}
 
 	create() {
-		this.choice_1 = this.add.rectangle(640, 250, 300, 150, 0xffffff).setInteractive().on("pointerdown", () => {
+        this.title = this.add.sprite(640, 200, "Title");
+		this.choice_1 = this.add.sprite(640, 350, "playButton").setInteractive().on("pointerdown", () => {
 			gameScene.scene.restart();
+            this.registry.set("equipment", { sword: 0, blade: 0, knife: 1 });
 			this.scene.switch("Game");
 		});
-		this.choice_3 = this.add.rectangle(640, 450, 300, 150, 0xffffff).setInteractive().on("pointerdown", () => {
+		this.choice_3 = this.add.sprite(640, 500, "githubButton").setInteractive().on("pointerdown", () => {
 			window.open("https://github.com/KissKonradUni/jatekprototipusok_2024_beadando", "_blank");
 		});
-		this.add.text(640, 250, "Start", { color: "#000", fontSize: "34px" } ).setDepth(1).setOrigin(0.5, 0.5);
-		this.add.text(640, 450, "GitHub", { color: "#000", fontSize: "34px" }).setDepth(1).setOrigin(0.5, 0.5);
 	}
 }
 
@@ -693,5 +708,7 @@ const game = new Phaser.Game({
             gravity: { y: 0 },
             //debug: true,
         },
-    },
+    }
 });
+
+Phaser.Canvas.setSmoothingEnabled(game.context, false);

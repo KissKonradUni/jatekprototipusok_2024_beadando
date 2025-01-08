@@ -73,17 +73,17 @@ A játék egy survival action game, ahol a játékos karakter folyamatosan táma
    - Automatikus támadási mechanika létrehozása.  
    - Egy alap fegyverrel kezdünk.
 
-3. **Ellenségek és hullámok:** (Választható) 
+3. **Ellenségek és hullámok:** (Cs. Balázs) 
    - Ellenségek generálása és mozgásmintáik megírása.  
 
-4. **Power-up rendszer:** (Választható, Többfős) 
+4. **Power-up rendszer:** (Cs. Balázs, Konrád polisholt) 
    - Szintlépés megírása.
    - Power-up tárgyak megjelenése és hatásaik implementálása. (3 közül választható szintlépésenként, végtelen alkalommal fejleszthetőek de csak 4 választható (össz. 5), utána új nem jelenik meg.)  
 
-5. **Felhasználói felület (UI):** (Választható) 
+5. **Felhasználói felület (UI):** (Konrád, Tamás és H. Balázs segített/tervezett) 
    - Pontszám, életerőcsík, inventory és egyéb vizuális elemek.  
 
-6. **Hangok és finomhangolás:** (Választható) 
+6. **Hangok és finomhangolás:** (Hangok kimaradt, Konrád írta, Tamás és H. Balázs segített/tervezett) 
    - Hangok hozzáadása és a játék optimalizálása.  
 
 ---  
